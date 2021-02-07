@@ -22,6 +22,7 @@ type SecureStore struct {
 	Username     string `yaml:"username"`
 	Password     string `yaml:"password"`
 	OTP          string `yaml:"otp"`
+	OTPType      string `yaml:"otp-type"`
 }
 
 func ReadLibrary() (InformerLibrary, error) {
