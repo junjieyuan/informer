@@ -25,36 +25,36 @@ type SecureStore struct {
 }
 
 func ReadLibrary() (InformerLibrary, error) {
+	dataLocation, err := dataDir()
+	if err != nil {
+		return InformerLibrary{}, err
+	}
+
+	libraryFile, err := ioutil.ReadFile(dataLocation)
+	if err != nil {
+		return InformerLibrary{}, err
+	}
+
+	library := InformerLibrary{}
+	err = yaml.Unmarshal(libraryFile, &library)
+	if err != nil {
+		return InformerLibrary{}, err
+	}
+
+	return library, nil
+}
+
+func dataDir() (string, error) {
 	dataPath := os.Getenv("XDG_DATA_HOME")
 	if dataPath == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
-			return InformerLibrary{}, err
+			return "", err
 		}
 
 		dataPath = strings.Join([]string{homeDir, ".local", "share"}, string(filepath.Separator))
 	}
 	location := strings.Join([]string{dataPath, "informer", "libraries.yaml"}, string(filepath.Separator))
 
-	library := InformerLibrary{}
-	err := readLibrary(location, &library)
-	if err != nil {
-		return InformerLibrary{}, err
-	}
-
-	return library, err
-}
-
-func readLibrary(location string, library *InformerLibrary) error {
-	libraryFile, err := ioutil.ReadFile(location)
-	if err != nil {
-		return err
-	}
-
-	err = yaml.Unmarshal(libraryFile, library)
-	if err != nil {
-		return err
-	}
-
-	return err
+	return location, nil
 }
