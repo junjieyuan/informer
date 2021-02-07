@@ -26,7 +26,7 @@ type SecureStore struct {
 }
 
 func ReadLibrary() (InformerLibrary, error) {
-	dataLocation, err := dataDir()
+	dataLocation, err := dataPath()
 	if err != nil {
 		return InformerLibrary{}, err
 	}
@@ -45,7 +45,7 @@ func ReadLibrary() (InformerLibrary, error) {
 	return library, nil
 }
 
-func dataDir() (string, error) {
+func dataPath() (string, error) {
 	dataPath := os.Getenv("XDG_DATA_HOME")
 	if dataPath == "" {
 		homeDir, err := os.UserHomeDir()
