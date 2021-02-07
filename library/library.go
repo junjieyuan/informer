@@ -45,6 +45,25 @@ func ReadLibrary() (InformerLibrary, error) {
 	return library, nil
 }
 
+func WriteLibrary(library InformerLibrary) error {
+	dataLocation, err := dataPath()
+	if err != nil {
+		return err
+	}
+
+	data, err := yaml.Marshal(library)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(dataLocation, data, os.FileMode(0600))
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func dataPath() (string, error) {
 	dataPath := os.Getenv("XDG_DATA_HOME")
 	if dataPath == "" {
