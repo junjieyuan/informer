@@ -51,7 +51,7 @@ func ReadLibrary() (InformerLibrary, error) {
 	return informerLibrary, nil
 }
 
-func WriteLibrary(informerLibrary *InformerLibrary) error {
+func (informerLibrary InformerLibrary) WriteLibrary() error {
 	dataLocation, err := dataPath()
 	if err != nil {
 		return err
@@ -85,7 +85,7 @@ func dataPath() (string, error) {
 	return location, nil
 }
 
-func Lock(informerLibrary *InformerLibrary, key []byte) error {
+func (informerLibrary *InformerLibrary) Lock(key []byte) error {
 	if informerLibrary.Unlocked {
 		for i := 0; i < len(informerLibrary.SecureStore); i++ {
 			encryptedPassword, err := encrypt(key, informerLibrary.SecureStore[i].Password)
@@ -107,7 +107,7 @@ func Lock(informerLibrary *InformerLibrary, key []byte) error {
 	return nil
 }
 
-func Unlock(informerLibrary *InformerLibrary, key []byte) error {
+func (informerLibrary *InformerLibrary) Unlock(key []byte) error {
 	if informerLibrary.Unlocked {
 		return nil
 	}
