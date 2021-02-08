@@ -36,22 +36,22 @@ func ReadLibrary() (InformerLibrary, error) {
 		return InformerLibrary{}, err
 	}
 
-	library := InformerLibrary{}
-	err = yaml.Unmarshal(libraryFile, &library)
+	informerLibrary := InformerLibrary{}
+	err = yaml.Unmarshal(libraryFile, &informerLibrary)
 	if err != nil {
 		return InformerLibrary{}, err
 	}
 
-	return library, nil
+	return informerLibrary, nil
 }
 
-func WriteLibrary(library InformerLibrary) error {
+func WriteLibrary(informerLibrary *InformerLibrary) error {
 	dataLocation, err := dataPath()
 	if err != nil {
 		return err
 	}
 
-	data, err := yaml.Marshal(library)
+	data, err := yaml.Marshal(informerLibrary)
 	if err != nil {
 		return err
 	}
