@@ -1,6 +1,11 @@
 package library
 
 import (
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/base64"
+	"io"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -11,6 +16,7 @@ import (
 
 type InformerLibrary struct {
 	Version     string        `yaml:"version"`
+	Unlocked    bool          `yaml:"unlocked"`
 	SecureStore []SecureStore `yaml:"libraries"`
 }
 
@@ -77,4 +83,97 @@ func dataPath() (string, error) {
 	location := strings.Join([]string{dataPath, "informer", "libraries.yaml"}, string(filepath.Separator))
 
 	return location, nil
+}
+
+func Lock(informerLibrary *InformerLibrary, key []byte) error {
+	if informerLibrary.Unlocked {
+		for i := 0; i < len(informerLibrary.SecureStore); i++ {
+			encryptedPassword, err := encrypt(key, informerLibrary.SecureStore[i].Password)
+			if err != nil {
+				panic(err.Error())
+			}
+			encryptedOTP, err := encrypt(key, informerLibrary.SecureStore[i].OTP)
+			if err != nil {
+				panic(err.Error())
+			}
+
+			informerLibrary.SecureStore[i].Password = encryptedPassword
+			informerLibrary.SecureStore[i].OTP = encryptedOTP
+		}
+		informerLibrary.Unlocked = false
+		return nil
+	}
+
+	return nil
+}
+
+func Unlock(informerLibrary *InformerLibrary, key []byte) error {
+	if informerLibrary.Unlocked {
+		return nil
+	}
+
+	for i := 0; i < len(informerLibrary.SecureStore); i++ {
+		decryptedPassword, err := decrypt(key, informerLibrary.SecureStore[i].Password)
+		if err != nil {
+			panic(err.Error())
+		}
+		decryptedOTP, err := decrypt(key, informerLibrary.SecureStore[i].OTP)
+		if err != nil {
+			panic(err.Error())
+		}
+
+		informerLibrary.SecureStore[i].Password = decryptedPassword
+		informerLibrary.SecureStore[i].OTP = decryptedOTP
+	}
+
+	informerLibrary.Unlocked = true
+
+	return nil
+}
+
+func encrypt(key []byte, plainMessage string) (cipherMessage string, err error) {
+	plainText := []byte(plainMessage)
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	nonce := make([]byte, aesGCM.NonceSize())
+	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
+		panic(err.Error())
+	}
+
+	cipherMessage = base64.StdEncoding.EncodeToString(aesGCM.Seal(nonce, nonce, plainText, nil))
+
+	return
+}
+
+func decrypt(key []byte, encryptedMessage string) (decryptedMessage string, err error) {
+	cipherText, err := base64.StdEncoding.DecodeString(encryptedMessage)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	block, err := aes.NewCipher(key)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	aesGCM, err := cipher.NewGCM(block)
+	if err != nil {
+		panic(err.Error())
+	}
+
+	nonce, cipherText := cipherText[:aesGCM.NonceSize()], cipherText[aesGCM.NonceSize():]
+
+	plainText, err := aesGCM.Open(nil, nonce, cipherText, nil)
+	decryptedMessage = string(plainText)
+
+	return
 }
