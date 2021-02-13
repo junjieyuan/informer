@@ -177,3 +177,37 @@ func decrypt(key []byte, encryptedMessage string) (decryptedMessage string, err 
 
 	return
 }
+
+//Add SecureStore as the latest element of queue.
+func (informerLibrary *InformerLibrary) Add(secure SecureStore) {
+	informerLibrary.SecureStore = append(informerLibrary.SecureStore, secure)
+}
+
+//Delete SecureStore at given index.
+func (informerLibrary *InformerLibrary) Remove(i int) {
+	informerLibrary.SecureStore = append(informerLibrary.SecureStore[0:i], informerLibrary.SecureStore[i+1:]...)
+}
+
+//Using given SecureStore to update SecureStore that at given index.
+func (informerLibrary *InformerLibrary) Update(i int, secure SecureStore) {
+	informerLibrary.SecureStore[i] = secure
+}
+
+//If found, return true and indexes, else return false and nil.
+func (informerLibrary InformerLibrary) Query(text string) (bool, []int) {
+	text = strings.ToLower(text)
+	var results []int
+	found := false
+
+	for i, secure := range informerLibrary.SecureStore {
+		if strings.Contains(strings.ToLower(secure.ID), text) ||
+			strings.Contains(strings.ToLower(secure.FriendlyName), text) ||
+			strings.Contains(strings.ToLower(secure.Username), text) {
+
+			found = true
+			results = append(results, i)
+		}
+	}
+
+	return found, results
+}
