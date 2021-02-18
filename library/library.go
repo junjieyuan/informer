@@ -194,20 +194,45 @@ func (informerLibrary *InformerLibrary) Update(i int, secure SecureStore) {
 }
 
 //If found, return true and indexes, else return false and nil.
-func (informerLibrary InformerLibrary) Query(text string) (bool, []int) {
+func (informerLibrary InformerLibrary) Query(text string) (bool, []SecureStore) {
 	text = strings.ToLower(text)
-	var results []int
+	var results []SecureStore
 	found := false
 
-	for i, secure := range informerLibrary.SecureStore {
+	for _, secure := range informerLibrary.SecureStore {
 		if strings.Contains(strings.ToLower(secure.ID), text) ||
 			strings.Contains(strings.ToLower(secure.FriendlyName), text) ||
 			strings.Contains(strings.ToLower(secure.Username), text) {
 
 			found = true
-			results = append(results, i)
+			results = append(results, secure)
 		}
 	}
 
 	return found, results
+}
+
+//If found, return true and indexes, else return false and nil.
+func (informerLibrary InformerLibrary) QueryPrimaryKey(id, platform, username string) (bool, int) {
+	for i, secure := range informerLibrary.SecureStore {
+		if strings.EqualFold(secure.ID, id) &&
+			strings.EqualFold(secure.Platform, platform) &&
+			strings.EqualFold(secure.Username, username) {
+
+			return true, i
+		}
+	}
+
+	return false, -1
+}
+
+//Return all of SecureStore
+func (informerLibrary InformerLibrary) List() []SecureStore {
+	var results []SecureStore
+
+	for _, secureStore := range informerLibrary.SecureStore {
+		results = append(results, secureStore)
+	}
+
+	return results
 }
