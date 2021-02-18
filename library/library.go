@@ -212,7 +212,7 @@ func (informerLibrary InformerLibrary) Query(text string) (bool, []SecureStore) 
 	return found, results
 }
 
-//If found, return true and indexes, else return false and nil.
+//If found, return true and index, else return false and -1.
 func (informerLibrary InformerLibrary) QueryPrimaryKey(id, platform, username string) (bool, int) {
 	for i, secure := range informerLibrary.SecureStore {
 		if strings.EqualFold(secure.ID, id) &&
