@@ -215,6 +215,7 @@ func inputSecureStore() library.SecureStore {
 	var id, platform, friendlyName, icon, username, password, otp, otpType string
 
 	fmt.Println("Input information:")
+
 	fmt.Print("id: ")
 	scanner.Scan()
 	id = scanner.Text()
