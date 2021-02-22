@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"junjie.pro/informer/api"
 	"junjie.pro/informer/library"
 	"os"
 )
@@ -16,6 +17,7 @@ var (
 	key        string
 	list       bool
 	showSecure bool
+	server     bool
 	flagSet    map[string]bool
 	version    bool
 )
@@ -28,6 +30,7 @@ func init() {
 	flag.StringVar(&key, "key", "", "Key for encrypt/decrypt secures")
 	flag.BoolVar(&list, "list", false, "List all secure")
 	flag.BoolVar(&showSecure, "show-secure", false, "Show plain text secure")
+	flag.BoolVar(&server, "server", false, "Enable server mode")
 	flag.BoolVar(&version, "version", false, "Show current version")
 	flag.Parse()
 
@@ -191,6 +194,10 @@ func main() {
 				printSecureStore(secure, showSecure)
 			}
 		}
+	}
+
+	if flagSet["server"] {
+		api.Serve()
 	}
 }
 
