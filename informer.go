@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"junjie.pro/informer/library"
 	"os"
-	"strings"
 )
 
 var (
@@ -83,27 +82,21 @@ func main() {
 			panic("key is empty")
 		}
 
-		reader := bufio.NewReader(os.Stdin)
+		scanner := bufio.NewScanner(os.Stdin)
 
 		fmt.Println("Input information:")
+
 		fmt.Print("id: ")
-		id, err := reader.ReadString('\n')
-		if err != nil {
-			panic(err)
-		}
-		id = strings.Trim(id, "\n")
+		scanner.Scan()
+		id := scanner.Text()
+
 		fmt.Print("platform: ")
-		platform, err := reader.ReadString('\n')
-		if err != nil {
-			panic(err)
-		}
-		platform = strings.Trim(platform, "\n")
+		scanner.Scan()
+		platform := scanner.Text()
+
 		fmt.Print("username: ")
-		username, err := reader.ReadString('\n')
-		if err != nil {
-			panic(err)
-		}
-		username = strings.Trim(username, "\n")
+		scanner.Scan()
+		username := scanner.Text()
 
 		found, index := informerLibrary.QueryPrimaryKey(id, platform, username)
 		if found {
@@ -134,27 +127,21 @@ func main() {
 	if flagSet["update"] {
 		fmt.Print("Update which Secure? ")
 
-		reader := bufio.NewReader(os.Stdin)
+		scanner := bufio.NewScanner(os.Stdin)
 
 		fmt.Println("Input information:")
+
 		fmt.Print("id: ")
-		id, err := reader.ReadString('\n')
-		if err != nil {
-			panic(err)
-		}
-		id = strings.Trim(id, "\n")
+		scanner.Scan()
+		id := scanner.Text()
+
 		fmt.Print("platform: ")
-		platform, err := reader.ReadString('\n')
-		if err != nil {
-			panic(err)
-		}
-		platform = strings.Trim(platform, "\n")
+		scanner.Scan()
+		platform := scanner.Text()
+
 		fmt.Print("username: ")
-		username, err := reader.ReadString('\n')
-		if err != nil {
-			panic(err)
-		}
-		username = strings.Trim(username, "\n")
+		scanner.Scan()
+		username := scanner.Text()
 
 		found, index := informerLibrary.QueryPrimaryKey(id, platform, username)
 		if found {
