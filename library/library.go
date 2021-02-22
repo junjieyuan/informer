@@ -15,20 +15,20 @@ import (
 )
 
 type InformerLibrary struct {
-	Version     string        `yaml:"version"`
-	Unlocked    bool          `yaml:"unlocked"`
-	SecureStore []SecureStore `yaml:"libraries"`
+	Version     string        `json:"version" yaml:"version"`
+	Unlocked    bool          `json:"unlocked" yaml:"unlocked"`
+	SecureStore []SecureStore `json:"libraries" yaml:"libraries"`
 }
 
 type SecureStore struct {
-	ID           string `yaml:"id"`
-	Platform     string `yaml:"platform"`
-	FriendlyName string `yaml:"friendly-name"`
-	Icon         string `yaml:"icon"`
-	Username     string `yaml:"username"`
-	Password     string `yaml:"password"`
-	OTP          string `yaml:"otp"`
-	OTPType      string `yaml:"otp-type"`
+	ID           string `json:"id" yaml:"id"`
+	Platform     string `json:"platform" yaml:"platform"`
+	FriendlyName string `json:"friendly-name" yaml:"friendly-name"`
+	Icon         string `json:"icon" yaml:"icon"`
+	Username     string `json:"username" yaml:"username"`
+	Password     string `json:"password" yaml:"password"`
+	OTP          string `json:"otp" yaml:"otp"`
+	OTPType      string `json:"otp-type" yaml:"otp-type"`
 }
 
 func ReadLibrary() (InformerLibrary, error) {
