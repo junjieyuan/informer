@@ -64,7 +64,7 @@ func main() {
 			panic(err)
 		}
 
-		secure, err := inputSecureStore()
+		secure := inputSecureStore()
 		informerLibrary.Add(secure)
 
 		err = informerLibrary.Lock([]byte(key))
@@ -158,10 +158,7 @@ func main() {
 
 		found, index := informerLibrary.QueryPrimaryKey(id, platform, username)
 		if found {
-			newSecure, err := inputSecureStore()
-			if err != nil {
-				panic(err)
-			}
+			newSecure := inputSecureStore()
 
 			err = informerLibrary.Unlock([]byte(key))
 			if err != nil {
@@ -226,59 +223,42 @@ func printSecureStore(secure library.SecureStore, showSecure bool) {
 	fmt.Println()
 }
 
-func inputSecureStore() (library.SecureStore, error) {
-	reader := bufio.NewReader(os.Stdin)
+func inputSecureStore() library.SecureStore {
+	scanner := bufio.NewScanner(os.Stdin)
 	var id, platform, friendlyName, icon, username, password, otp, otpType string
 
 	fmt.Println("Input information:")
 	fmt.Print("id: ")
-	id, err := reader.ReadString('\n')
-	if err != nil {
-		return library.SecureStore{}, err
-	}
-	id = strings.Trim(id, "\n")
+	scanner.Scan()
+	id = scanner.Text()
+
 	fmt.Print("platform: ")
-	platform, err = reader.ReadString('\n')
-	if err != nil {
-		return library.SecureStore{}, err
-	}
-	platform = strings.Trim(platform, "\n")
+	scanner.Scan()
+	platform = scanner.Text()
+
 	fmt.Print("friendly name: ")
-	friendlyName, err = reader.ReadString('\n')
-	if err != nil {
-		return library.SecureStore{}, err
-	}
-	friendlyName = strings.Trim(friendlyName, "\n")
+	scanner.Scan()
+	friendlyName = scanner.Text()
+
 	fmt.Print("icon: ")
-	icon, err = reader.ReadString('\n')
-	if err != nil {
-		return library.SecureStore{}, err
-	}
-	icon = strings.Trim(icon, "\n")
+	scanner.Scan()
+	icon = scanner.Text()
+
 	fmt.Print("username: ")
-	username, err = reader.ReadString('\n')
-	if err != nil {
-		return library.SecureStore{}, err
-	}
-	username = strings.Trim(username, "\n")
+	scanner.Scan()
+	username = scanner.Text()
+
 	fmt.Print("password: ")
-	password, err = reader.ReadString('\n')
-	if err != nil {
-		return library.SecureStore{}, err
-	}
-	password = strings.Trim(password, "\n")
+	scanner.Scan()
+	password = scanner.Text()
+
 	fmt.Print("otp: ")
-	otp, err = reader.ReadString('\n')
-	if err != nil {
-		return library.SecureStore{}, err
-	}
-	otp = strings.Trim(otp, "\n")
+	scanner.Scan()
+	otp = scanner.Text()
+
 	fmt.Print("otp type: ")
-	otpType, err = reader.ReadString('\n')
-	if err != nil {
-		return library.SecureStore{}, err
-	}
-	otpType = strings.Trim(otpType, "\n")
+	scanner.Scan()
+	otpType = scanner.Text()
 
 	secure := library.SecureStore{
 		ID:           id,
@@ -291,5 +271,5 @@ func inputSecureStore() (library.SecureStore, error) {
 		OTPType:      otpType,
 	}
 
-	return secure, err
+	return secure
 }
