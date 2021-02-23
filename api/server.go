@@ -37,7 +37,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if queryParams["query"] != nil{
+	if queryParams["query"] != nil {
 		found, secures := informerLibrary.Query(queryParams["query"][0])
 		if found {
 			err = json.NewEncoder(w).Encode(secures)
