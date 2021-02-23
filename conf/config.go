@@ -81,6 +81,21 @@ func (informerConfig InformerConfig) CheckUser(user User) bool {
 	return false
 }
 
+func (informerConfig InformerConfig) CheckLogin(username string, token string) bool {
+	if informerConfig.User.Username == username {
+		for _, knownToken := range informerConfig.User.Tokens {
+			if knownToken.ID == token {
+				expireDate := knownToken.CreateDate.AddDate(0, 0, informerConfig.RenewalCycle)
+				if expireDate.After(time.Now()) {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
 func (user *User) AddToken(token Token) {
 	user.Tokens = append(user.Tokens, token)
 }
