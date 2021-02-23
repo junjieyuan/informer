@@ -309,8 +309,26 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 }
 
 func Update(w http.ResponseWriter, r *http.Request) {
+	informerConfig, err := conf.ReadConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	username, err := r.Cookie("username")
+	if err != nil {
+		panic(err)
+	}
+	tokenId, err := r.Cookie("token")
+	if err != nil {
+		panic(err)
+	}
+
+	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		//TODO 302 redirect to login page
+		return
+	}
+
 	var secureNKey secureWithKey
-	var err error
 
 	body, err := ioutil.ReadAll(io.Reader(r.Body))
 	if err != nil {
