@@ -54,6 +54,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
+	username, err := r.Cookie("username")
+	if err != nil {
+		panic(err)
+	}
+	tokenId, err := r.Cookie("token")
+	if err != nil {
+		panic(err)
+	}
+
+	//If user is already logged in, don't login again.
+	if informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		return
+	}
+
 	if informerConfig.CheckUser(user) {
 		tokenId := conf.GenerateToken()
 		createDate := time.Now()
