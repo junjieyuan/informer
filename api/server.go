@@ -29,7 +29,27 @@ func List(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 
-	err = json.NewEncoder(w).Encode(informerLibrary)
+	queryParams := r.URL.Query()
+	if queryParams["key"] != nil {
+		err = informerLibrary.Unlock([]byte(queryParams["key"][0]))
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if queryParams["query"] != nil{
+		found, secures := informerLibrary.Query(queryParams["query"][0])
+		if found {
+			err = json.NewEncoder(w).Encode(secures)
+			if err != nil {
+				panic(err)
+			}
+		}
+
+		return
+	}
+
+	err = json.NewEncoder(w).Encode(informerLibrary.SecureStore)
 	if err != nil {
 		panic(err)
 	}
