@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"errors"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -15,6 +16,7 @@ func Serve() {
 	router.HandleFunc("/libraries", List)
 	router.HandleFunc("/libraries/add", Add)
 	router.HandleFunc("/libraries/remove", Remove)
+	router.HandleFunc("/libraries/update", Update)
 
 	log.Fatalln(http.ListenAndServe(":8080", router))
 }
@@ -124,6 +126,62 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		if found {
 			informerLibrary.Remove(index)
 		}
+	}
+
+	err = informerLibrary.Lock([]byte(secureNKey.Key))
+	if err != nil {
+		panic(err)
+	}
+
+	err = informerLibrary.WriteLibrary()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func Update(w http.ResponseWriter, r *http.Request) {
+	var secureNKey secureWithKey
+	var err error
+
+	body, err := ioutil.ReadAll(io.Reader(r.Body))
+	if err != nil {
+		panic(err)
+	}
+
+	err = r.Body.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(body, &secureNKey)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(500)
+		err = json.NewEncoder(w).Encode(err)
+		if err != nil {
+			panic(err)
+		}
+	}
+
+	if len(secureNKey.Secure) != 2 {
+		err = errors.New("array must have 2 secure")
+		//TODO return
+	}
+	original, updated := secureNKey.Secure[0], secureNKey.Secure[1]
+
+	informerLibrary, err := library.ReadLibrary()
+	if err != nil {
+		panic(err)
+	}
+
+	err = informerLibrary.Unlock([]byte(secureNKey.Key))
+	if err != nil {
+		panic(err)
+	}
+
+	found, index := informerLibrary.QueryPrimaryKey(original.ID, original.Platform, original.Username)
+	if found {
+		informerLibrary.Update(index, updated)
 	}
 
 	err = informerLibrary.Lock([]byte(secureNKey.Key))
