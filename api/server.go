@@ -136,11 +136,13 @@ func List(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 	}
 
-	if username != nil && tokenId != nil {
-		if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-			//TODO 302 redirect to login page
-			return
-		}
+	if username == nil || tokenId == nil {
+		//TODO 302 redirect to login page
+		return
+	}
+	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		//TODO 302 redirect to login page
+		return
 	}
 
 	w.Header().Add("Content-Type", "application/json")
@@ -196,11 +198,13 @@ func Add(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 	}
 
-	if username != nil && tokenId != nil {
-		if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-			//TODO 302 redirect to login page
-			return
-		}
+	if username == nil || tokenId == nil {
+		//TODO 302 redirect to login page
+		return
+	}
+	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		//TODO 302 redirect to login page
+		return
 	}
 
 	var secureNKey secureWithKey
@@ -219,7 +223,8 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		err = json.NewEncoder(w).Encode(err)
+		message := fmt.Sprintf("{\"message\": \"%s\"}", err.Error())
+		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			panic(err)
 		}
@@ -265,11 +270,13 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 	}
 
-	if username != nil && tokenId != nil {
-		if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-			//TODO 302 redirect to login page
-			return
-		}
+	if username == nil || tokenId == nil {
+		//TODO 302 redirect to login page
+		return
+	}
+	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		//TODO 302 redirect to login page
+		return
 	}
 
 	var secureNKey secureWithKey
@@ -288,7 +295,8 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		err = json.NewEncoder(w).Encode(err)
+		message := fmt.Sprintf("{\"message\": \"%s\"}", err.Error())
+		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			panic(err)
 		}
@@ -337,11 +345,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 	}
 
-	if username != nil && tokenId != nil {
-		if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-			//TODO 302 redirect to login page
-			return
-		}
+	if username == nil || tokenId == nil {
+		//TODO 302 redirect to login page
+		return
+	}
+	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		//TODO 302 redirect to login page
+		return
 	}
 
 	var secureNKey secureWithKey
@@ -360,7 +370,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		err = json.NewEncoder(w).Encode(err)
+		message := fmt.Sprintf("{\"message\": \"%s\"}", err.Error())
+		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			panic(err)
 		}
