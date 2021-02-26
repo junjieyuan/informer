@@ -14,6 +14,8 @@ import (
 	"time"
 )
 
+const messageTemplate = "{\"message\": \"%s\"}"
+
 func Serve() {
 	log.Println("Starting server")
 	router := mux.NewRouter().StrictSlash(true)
@@ -31,6 +33,8 @@ func Serve() {
 func Login(w http.ResponseWriter, r *http.Request) {
 	var user conf.User
 
+	w.Header().Add("Content-Type", "application/json")
+
 	body, err := ioutil.ReadAll(io.Reader(r.Body))
 	if err != nil {
 		panic(err)
@@ -43,9 +47,8 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	err = json.Unmarshal(body, &user)
 	if err != nil {
-		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		message := fmt.Sprintf("{\"message\": \"%s\"}", err.Error())
+		message := fmt.Sprintf(messageTemplate, err.Error())
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			panic(err)
@@ -70,8 +73,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	//If user is already logged in, don't login again.
 	if username != nil && tokenId != nil {
 		if informerConfig.CheckLogin(username.Value, tokenId.Value) {
-			//TODO redirect
 			log.Println("User already logged in")
+			err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "success"))
+			if err != nil {
+				panic(err)
+			}
 			return
 		}
 	}
@@ -118,7 +124,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic(err)
 		}
+
+		err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "success"))
+		return
 	}
+
+	w.WriteHeader(500)
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
