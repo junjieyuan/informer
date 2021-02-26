@@ -126,16 +126,18 @@ func List(w http.ResponseWriter, r *http.Request) {
 
 	username, err := r.Cookie("username")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 
-	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-		//TODO 302 redirect to login page
-		return
+	if username != nil && tokenId != nil {
+		if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+			//TODO 302 redirect to login page
+			return
+		}
 	}
 
 	w.Header().Add("Content-Type", "application/json")
@@ -184,16 +186,18 @@ func Add(w http.ResponseWriter, r *http.Request) {
 
 	username, err := r.Cookie("username")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 
-	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-		//TODO 302 redirect to login page
-		return
+	if username != nil && tokenId != nil {
+		if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+			//TODO 302 redirect to login page
+			return
+		}
 	}
 
 	var secureNKey secureWithKey
@@ -251,16 +255,18 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 
 	username, err := r.Cookie("username")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 
-	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-		//TODO 302 redirect to login page
-		return
+	if username != nil && tokenId != nil {
+		if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+			//TODO 302 redirect to login page
+			return
+		}
 	}
 
 	var secureNKey secureWithKey
@@ -321,16 +327,18 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	username, err := r.Cookie("username")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 
-	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-		//TODO 302 redirect to login page
-		return
+	if username != nil && tokenId != nil {
+		if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+			//TODO 302 redirect to login page
+			return
+		}
 	}
 
 	var secureNKey secureWithKey
