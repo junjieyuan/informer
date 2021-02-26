@@ -14,6 +14,7 @@ import (
 )
 
 func Serve() {
+	log.Println("Starting server")
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/login", Login)
@@ -56,16 +57,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 
 	username, err := r.Cookie("username")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
 	}
 
 	//If user is already logged in, don't login again.
-	if informerConfig.CheckLogin(username.Value, tokenId.Value) {
-		return
+	if username != nil && tokenId != nil {
+		if informerConfig.CheckLogin(username.Value, tokenId.Value) {
+			//TODO redirect
+			log.Println("User already logged in")
+			return
+		}
 	}
 
 	if informerConfig.CheckUser(user) {
