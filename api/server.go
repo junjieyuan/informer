@@ -3,6 +3,7 @@ package api
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
@@ -44,10 +45,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		err = json.NewEncoder(w).Encode(err)
+		message := fmt.Sprintf("{\"message\": \"%s\"}", err.Error())
+		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			panic(err)
 		}
+		return
 	}
 
 	informerConfig, err := conf.ReadConfig()
