@@ -473,6 +473,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	user.Username = username.Value
 	informerConfig.ChangePassword(user)
 
 	err = informerConfig.WriteConfig()
