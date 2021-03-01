@@ -282,12 +282,13 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 	}
 
-	if username == nil || tokenId == nil {
-		//TODO 302 redirect to login page
-		return
-	}
-	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
-		//TODO 302 redirect to login page
+	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		w.WriteHeader(403)
+		message := fmt.Sprintf(messageTemplate, "not logged in")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 
