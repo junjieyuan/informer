@@ -385,7 +385,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		message := fmt.Sprintf("{\"message\": \"%s\"}", err.Error())
+		message := fmt.Sprintf(messageTemplate, err.Error())
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			panic(err)
@@ -394,7 +394,13 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	if len(secureNKey.Secure) != 2 {
 		err = errors.New("array must have 2 secure")
-		//TODO return
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(500)
+		message := fmt.Sprintf(messageTemplate, err.Error())
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			panic(err)
+		}
 	}
 	original, updated := secureNKey.Secure[0], secureNKey.Secure[1]
 
