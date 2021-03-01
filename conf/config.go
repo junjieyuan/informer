@@ -118,3 +118,12 @@ func configPath() (string, error) {
 func GenerateToken() string {
 	return uuid.NewString()
 }
+
+func (informerConfig *InformerConfig) ChangePassword(newUser User) {
+	if informerConfig.User.Username == newUser.Username {
+		//covert [N]byte to []byte, then covert []byte to hex string, same as sha3sum command
+		digest := sha3.Sum512([]byte(newUser.Password))
+		informerConfig.User.Password = hex.EncodeToString(digest[:])
+		informerConfig.User.Tokens = nil
+	}
+}

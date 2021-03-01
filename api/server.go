@@ -27,6 +27,8 @@ func Serve() {
 	router.HandleFunc("/libraries/remove", Remove)
 	router.HandleFunc("/libraries/update", Update)
 
+	router.HandleFunc("/change-password", ChangePassword)
+
 	log.Fatalln(http.ListenAndServe(":8080", router))
 }
 
@@ -417,6 +419,63 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = informerLibrary.WriteLibrary()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func ChangePassword(w http.ResponseWriter, r *http.Request) {
+	informerConfig, err := conf.ReadConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	username, err := r.Cookie("username")
+	if err != nil {
+		log.Println(err.Error())
+	}
+	tokenId, err := r.Cookie("token")
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		w.WriteHeader(403)
+		err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "not logged in"))
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	var user conf.User
+
+	w.Header().Add("Content-Type", "application/json")
+
+	body, err := ioutil.ReadAll(io.Reader(r.Body))
+	if err != nil {
+		panic(err)
+	}
+
+	err = r.Body.Close()
+	if err != nil {
+		panic(err)
+	}
+
+	err = json.Unmarshal(body, &user)
+	if err != nil {
+		w.WriteHeader(500)
+		message := fmt.Sprintf(messageTemplate, err.Error())
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			panic(err)
+		}
+		return
+	}
+
+	informerConfig.ChangePassword(user)
+
+	err = informerConfig.WriteConfig()
 	if err != nil {
 		panic(err)
 	}
