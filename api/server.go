@@ -148,7 +148,11 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if username == nil || tokenId == nil {
-		//TODO 302 redirect to login page
+		w.WriteHeader(403)
+		err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "not logged in"))
+		if err != nil {
+			panic(err)
+		}
 		return
 	}
 	if !informerConfig.CheckLogin(username.Value, tokenId.Value) {
