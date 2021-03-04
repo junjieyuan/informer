@@ -33,64 +33,81 @@ func Serve() {
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {
-	var user conf.User
-
+	//Response message is json
 	w.Header().Add("Content-Type", "application/json")
 
+	//Read request body and close it
 	body, err := ioutil.ReadAll(io.Reader(r.Body))
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Fatalln(err)
 	}
-
 	err = r.Body.Close()
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Fatalln(err)
 	}
 
+	//Read informer configurations
+	informerConfig, err := conf.ReadConfig()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+
+	//Read login token from cookie
+	username, err := r.Cookie("username")
+	if err != nil {
+		log.Println(err)
+	}
+	tokenId, err := r.Cookie("token")
+	if err != nil {
+		log.Println(err)
+	}
+
+	//Check user is already logged in whether
+	if username != nil && tokenId != nil && informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		w.WriteHeader(200)
+		message := fmt.Sprintf(messageTemplate, "success")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		return
+	}
+
+	//Parse user login information from request body
+	var user conf.User
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		w.WriteHeader(500)
 		message := fmt.Sprintf(messageTemplate, err.Error())
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
+
 		return
 	}
 
-	informerConfig, err := conf.ReadConfig()
-	if err != nil {
-		panic(err)
-	}
-
-	username, err := r.Cookie("username")
-	if err != nil {
-		log.Println(err.Error())
-	}
-	tokenId, err := r.Cookie("token")
-	if err != nil {
-		log.Println(err.Error())
-	}
-
-	//If user is already logged in, don't login again.
-	if username != nil && tokenId != nil {
-		if informerConfig.CheckLogin(username.Value, tokenId.Value) {
-			log.Println("User already logged in")
-			err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "success"))
-			if err != nil {
-				panic(err)
-			}
-			return
-		}
-	}
-
+	//If login information correctly and successfully login, return 200 success,
+	//else return 401 login information not correctly or 500
 	if informerConfig.CheckUser(user) {
 		tokenId := conf.GenerateToken()
 		createDate := time.Now()
 		token := conf.Token{ID: tokenId, CreateDate: createDate}
 		expire := time.Now().AddDate(0, 0, informerConfig.RenewalCycle)
 
+		//Save token
 		informerConfig.User.AddToken(token)
+		err = informerConfig.WriteConfig()
+		if err != nil {
+			w.WriteHeader(500)
+			log.Fatalln(err)
+		}
+
+		//Set cookie: username and token
 		usernameCookie := http.Cookie{
 			Name:       "username",
 			Value:      user.Username,
@@ -122,16 +139,20 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		}
 		http.SetCookie(w, &tokenCookie)
 
-		err := informerConfig.WriteConfig()
+		w.WriteHeader(200)
+		message := fmt.Sprintf(messageTemplate, "success")
+		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
-
-		err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "success"))
-		return
+	} else {
+		w.WriteHeader(401)
+		message := fmt.Sprintf(messageTemplate, "username or password not correctly")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
-
-	w.WriteHeader(500)
 }
 
 func List(w http.ResponseWriter, r *http.Request) {
