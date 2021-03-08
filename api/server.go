@@ -29,7 +29,18 @@ func Serve() {
 
 	router.HandleFunc("/change-password", ChangePassword)
 
-	log.Fatalln(http.ListenAndServe(":8080", router))
+	//Listen on specific port, if port not set, using 8080
+	informer, err := conf.ReadConfig()
+	if err != nil {
+		log.Fatalln(err.Error())
+	}
+	var port string
+	if informer.Port == "" {
+		port = ":8080"
+	} else {
+		port = ":" + informer.Port
+	}
+	log.Fatalln(http.ListenAndServe(port, router))
 }
 
 func Login(w http.ResponseWriter, r *http.Request) {

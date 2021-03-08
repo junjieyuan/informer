@@ -15,6 +15,7 @@ import (
 type InformerConfig struct {
 	Version      string `yaml:"version"`
 	RenewalCycle int    `yaml:"renewal-cycle"`
+	Port         string `yaml:"port"`
 	User         User   `yaml:"user"`
 }
 
