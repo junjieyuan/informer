@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/gorilla/mux"
 	"io"
@@ -421,88 +420,129 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Replace a secure by other one
 func Update(w http.ResponseWriter, r *http.Request) {
-	informerConfig, err := conf.ReadConfig()
+	//Response message is json
+	w.Header().Add("Content-Type", "application/json")
+
+	//Read request body and close it
+	body, err := ioutil.ReadAll(io.Reader(r.Body))
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+	err = r.Body.Close()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
 	}
 
+	//Read informer configurations
+	informerConfig, err := conf.ReadConfig()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+
+	//Read login token from cookie
 	username, err := r.Cookie("username")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 	}
 
+	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "not logged in"))
+		message := fmt.Sprintf(messageTemplate, "not logged in")
+		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
+
 		return
 	}
 
+	//Parse encryption key and secure(s) from request body
 	var secureNKey secureWithKey
-
-	body, err := ioutil.ReadAll(io.Reader(r.Body))
-	if err != nil {
-		panic(err)
-	}
-
-	err = r.Body.Close()
-	if err != nil {
-		panic(err)
-	}
-
 	err = json.Unmarshal(body, &secureNKey)
 	if err != nil {
-		w.Header().Add("Content-Type", "application/json")
+		log.Println(err.Error())
+
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, err.Error())
+		message := fmt.Sprintf(messageTemplate, "data not correctly")
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err.Error())
 		}
+
+		return
 	}
 
+	//Must send 2 secures, the first is origin, and the second is updated
 	if len(secureNKey.Secure) != 2 {
-		err = errors.New("array must have 2 secure")
-		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, err.Error())
+		message := fmt.Sprintf(messageTemplate, "array must have 2 secure")
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err.Error())
 		}
 	}
 	original, updated := secureNKey.Secure[0], secureNKey.Secure[1]
 
+	//Read informer library
 	informerLibrary, err := library.ReadLibrary()
 	if err != nil {
-		panic(err)
+		log.Fatalln(err.Error())
 	}
 
+	//Unlock informer library
 	err = informerLibrary.Unlock([]byte(secureNKey.Key))
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		message := fmt.Sprintf(messageTemplate, "data not correctly")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		return
 	}
 
+	//Using origin secure to find index and replace by updated secure
 	found, index := informerLibrary.QueryPrimaryKey(original.ID, original.Platform, original.Username)
 	if found {
 		informerLibrary.Update(index, updated)
 	}
 
+	//Lock informer library
 	err = informerLibrary.Lock([]byte(secureNKey.Key))
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Println(err.Error())
+
+		return
 	}
 
+	//Write informer library
 	err = informerLibrary.WriteLibrary()
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Println(err.Error())
+
+		return
+	}
+
+	//Return 200 success
+	w.WriteHeader(200)
+	message := fmt.Sprintf(messageTemplate, "success")
+	err = json.NewEncoder(w).Encode(message)
+	if err != nil {
+		log.Fatalln(err.Error())
 	}
 }
 
