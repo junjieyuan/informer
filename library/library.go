@@ -90,11 +90,11 @@ func (informerLibrary *InformerLibrary) Lock(key []byte) error {
 		for i := 0; i < len(informerLibrary.SecureStore); i++ {
 			encryptedPassword, err := encrypt(key, informerLibrary.SecureStore[i].Password)
 			if err != nil {
-				panic(err.Error())
+				return err
 			}
 			encryptedOTP, err := encrypt(key, informerLibrary.SecureStore[i].OTP)
 			if err != nil {
-				panic(err.Error())
+				return err
 			}
 
 			informerLibrary.SecureStore[i].Password = encryptedPassword
@@ -115,11 +115,11 @@ func (informerLibrary *InformerLibrary) Unlock(key []byte) error {
 	for i := 0; i < len(informerLibrary.SecureStore); i++ {
 		decryptedPassword, err := decrypt(key, informerLibrary.SecureStore[i].Password)
 		if err != nil {
-			panic(err.Error())
+			return err
 		}
 		decryptedOTP, err := decrypt(key, informerLibrary.SecureStore[i].OTP)
 		if err != nil {
-			panic(err.Error())
+			return err
 		}
 
 		informerLibrary.SecureStore[i].Password = decryptedPassword
@@ -136,17 +136,17 @@ func encrypt(key []byte, plainMessage string) (cipherMessage string, err error) 
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	aesGCM, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	nonce := make([]byte, aesGCM.NonceSize())
 	if _, err := io.ReadFull(rand.Reader, nonce); err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	cipherMessage = base64.StdEncoding.EncodeToString(aesGCM.Seal(nonce, nonce, plainText, nil))
@@ -157,17 +157,17 @@ func encrypt(key []byte, plainMessage string) (cipherMessage string, err error) 
 func decrypt(key []byte, encryptedMessage string) (decryptedMessage string, err error) {
 	cipherText, err := base64.StdEncoding.DecodeString(encryptedMessage)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	aesGCM, err := cipher.NewGCM(block)
 	if err != nil {
-		panic(err.Error())
+		return "", err
 	}
 
 	nonce, cipherText := cipherText[:aesGCM.NonceSize()], cipherText[aesGCM.NonceSize():]
