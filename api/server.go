@@ -229,61 +229,80 @@ type secureWithKey struct {
 }
 
 func Add(w http.ResponseWriter, r *http.Request) {
-	informerConfig, err := conf.ReadConfig()
+	//Response message is json
+	w.Header().Add("Content-Type", "application/json")
+
+	//Read request body and close it
+	body, err := ioutil.ReadAll(io.Reader(r.Body))
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+	err = r.Body.Close()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
 	}
 
+	//Read informer configurations
+	informerConfig, err := conf.ReadConfig()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+
+	//Read login token from cookie
 	username, err := r.Cookie("username")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 	}
 
+	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
 		message := fmt.Sprintf(messageTemplate, "not logged in")
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
+
 		return
 	}
 
+	//Parse encryption key and secure(s) from request body
 	var secureNKey secureWithKey
-
-	body, err := ioutil.ReadAll(io.Reader(r.Body))
-	if err != nil {
-		panic(err)
-	}
-
-	err = r.Body.Close()
-	if err != nil {
-		panic(err)
-	}
-
 	err = json.Unmarshal(body, &secureNKey)
 	if err != nil {
-		w.Header().Add("Content-Type", "application/json")
 		w.WriteHeader(500)
-		message := fmt.Sprintf("{\"message\": \"%s\"}", err.Error())
+		message := fmt.Sprintf(messageTemplate, "data not correctly")
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err.Error())
 		}
+
+		return
 	}
 
 	informerLibrary, err := library.ReadLibrary()
 	if err != nil {
-		panic(err)
+		log.Fatalln(err.Error())
 	}
 
 	err = informerLibrary.Unlock([]byte(secureNKey.Key))
 	if err != nil {
-		panic(err)
+		log.Println(err.Error())
+		w.WriteHeader(500)
+		message := fmt.Sprintf(messageTemplate, "data not correctly")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		return
 	}
 
 	for _, secure := range secureNKey.Secure {
@@ -292,12 +311,23 @@ func Add(w http.ResponseWriter, r *http.Request) {
 
 	err = informerLibrary.Lock([]byte(secureNKey.Key))
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Println(err.Error())
+
+		return
 	}
 
 	err = informerLibrary.WriteLibrary()
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Fatalln(err.Error())
+	}
+
+	w.WriteHeader(200)
+	message := fmt.Sprintf(messageTemplate, "success")
+	err = json.NewEncoder(w).Encode(message)
+	if err != nil {
+		log.Fatalln(err.Error())
 	}
 }
 
