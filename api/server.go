@@ -165,57 +165,77 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Return all of secures or query by query string
 func List(w http.ResponseWriter, r *http.Request) {
+	//Response message is json
+	w.Header().Add("Content-Type", "application/json")
+
+	//Read informer configurations
 	informerConfig, err := conf.ReadConfig()
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Fatalln(err)
 	}
 
+	//Read login token from cookie
 	username, err := r.Cookie("username")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 	}
 
+	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "not logged in"))
+		message := fmt.Sprintf(messageTemplate, "not logged in")
+		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
+
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-
+	//Read informer library
 	informerLibrary, err := library.ReadLibrary()
 	if err != nil {
 		panic(err)
 	}
 
+	//Using query parameters to query secures. If key is given, informer will decrypt secures
 	queryParams := r.URL.Query()
 	if queryParams["key"] != nil {
 		err = informerLibrary.Unlock([]byte(queryParams["key"][0]))
 		if err != nil {
-			panic(err)
+			log.Println(err.Error())
+			w.WriteHeader(500)
+			message := fmt.Sprintf(messageTemplate, "data not correctly")
+			err = json.NewEncoder(w).Encode(message)
+			if err != nil {
+				log.Fatalln(err.Error())
+			}
+
+			return
 		}
 	}
-
+	//Find secures by query string, and results is encoded in json
 	if queryParams["query"] != nil {
 		found, secures := informerLibrary.Query(queryParams["query"][0])
 		if found {
+			w.WriteHeader(200)
 			err = json.NewEncoder(w).Encode(secures)
 			if err != nil {
-				panic(err)
+				log.Fatalln(err.Error())
 			}
 		}
 
 		return
 	}
 
+	//If not given any query string, just list all of secures without decrypt
 	err = json.NewEncoder(w).Encode(informerLibrary.SecureStore)
 	if err != nil {
 		panic(err)
