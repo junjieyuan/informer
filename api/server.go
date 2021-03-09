@@ -572,6 +572,7 @@ type PasswordBundle struct {
 	Confirm string `json:"confirm"`
 }
 
+//Change user's password
 func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	//Response message is json
 	w.Header().Add("Content-Type", "application/json")
