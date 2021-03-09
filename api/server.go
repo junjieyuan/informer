@@ -204,12 +204,12 @@ func List(w http.ResponseWriter, r *http.Request) {
 	//Read informer library
 	informerLibrary, err := library.ReadLibrary()
 	if err != nil {
-		panic(err)
+		log.Fatalln(err.Error())
 	}
 
 	//Using query parameters to query secures. If key is given, informer will decrypt secures
 	queryParams := r.URL.Query()
-	if queryParams["key"] != nil {
+	if queryParams["key"] != nil && queryParams["key"][0] != "" {
 		err = informerLibrary.Unlock([]byte(queryParams["key"][0]))
 		if err != nil {
 			log.Println(err.Error())
@@ -240,7 +240,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	//If not given any query string, just list all of secures without decrypt
 	err = json.NewEncoder(w).Encode(informerLibrary.SecureStore)
 	if err != nil {
-		panic(err)
+		log.Fatalln(err.Error())
 	}
 }
 
