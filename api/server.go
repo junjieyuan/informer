@@ -27,6 +27,7 @@ func Serve() {
 	router.HandleFunc("/libraries/update", Update)
 
 	router.HandleFunc("/change-password", ChangePassword)
+	router.HandleFunc("/change-master-password", ChangeMasterPassword)
 
 	//Listen on specific port, if port not set, using 8080
 	informer, err := conf.ReadConfig()
@@ -567,8 +568,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 type PasswordBundle struct {
-	Old string `json:"old"`
-	New string `json:"new"`
+	Old     string `json:"old"`
+	New     string `json:"new"`
 	Confirm string `json:"confirm"`
 }
 
@@ -655,6 +656,127 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		log.Fatalln(err.Error())
+	}
+
+	w.WriteHeader(200)
+	message := fmt.Sprintf(messageTemplate, "success")
+	err = json.NewEncoder(w).Encode(message)
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err.Error())
+	}
+}
+
+//Change user's master password
+func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
+	//Response message is json
+	w.Header().Add("Content-Type", "application/json")
+
+	//Read request body and close it
+	body, err := ioutil.ReadAll(io.Reader(r.Body))
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+	err = r.Body.Close()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+
+	//Read informer configurations
+	informerConfig, err := conf.ReadConfig()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+
+	//Read login token from cookie
+	username, err := r.Cookie("username")
+	if err != nil {
+		log.Println(err)
+	}
+	tokenId, err := r.Cookie("token")
+	if err != nil {
+		log.Println(err)
+	}
+
+	//Check user is already logged in whether
+	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		w.WriteHeader(403)
+		message := fmt.Sprintf(messageTemplate, "not logged in")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		return
+	}
+
+	//Parse passwords from request body
+	var passwords PasswordBundle
+	err = json.Unmarshal(body, &passwords)
+	if err != nil {
+		log.Println(err.Error())
+
+		w.WriteHeader(500)
+		message := fmt.Sprintf(messageTemplate, "data not correctly")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		return
+	}
+
+	//Read informer library
+	informerLibrary, err := library.ReadLibrary()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err.Error())
+	}
+
+	//Change password when they correctly
+	if passwords.New == passwords.Confirm {
+		//Unlock informer library using old password
+		err = informerLibrary.Unlock([]byte(passwords.Old))
+		if err != nil {
+			log.Println(err.Error())
+			w.WriteHeader(500)
+			message := fmt.Sprintf(messageTemplate, "data not correctly")
+			err = json.NewEncoder(w).Encode(message)
+			if err != nil {
+				log.Fatalln(err.Error())
+			}
+
+			return
+		}
+
+		//Lock informer library using new password
+		err = informerLibrary.Lock([]byte(passwords.New))
+		if err != nil {
+			w.WriteHeader(500)
+			log.Println(err.Error())
+
+			return
+		}
+
+		//Write informer library
+		err = informerLibrary.WriteLibrary()
+		if err != nil {
+			w.WriteHeader(500)
+			log.Fatalln(err.Error())
+		}
+	} else {
+		//If passwords not correctly, return 500 data not correctly
+		w.WriteHeader(500)
+		message := fmt.Sprintf(messageTemplate, "data not correctly")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln()
+		}
+
+		return
 	}
 
 	w.WriteHeader(200)
