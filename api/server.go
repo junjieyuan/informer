@@ -566,60 +566,92 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+type PasswordBundle struct {
+	Old string `json:"old"`
+	New string `json:"new"`
+	Confirm string `json:"confirm"`
+}
+
 func ChangePassword(w http.ResponseWriter, r *http.Request) {
-	informerConfig, err := conf.ReadConfig()
+	//Response message is json
+	w.Header().Add("Content-Type", "application/json")
+
+	//Read request body and close it
+	body, err := ioutil.ReadAll(io.Reader(r.Body))
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+	err = r.Body.Close()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
 	}
 
+	//Read informer configurations
+	informerConfig, err := conf.ReadConfig()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+
+	//Read login token from cookie
 	username, err := r.Cookie("username")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 	}
 	tokenId, err := r.Cookie("token")
 	if err != nil {
-		log.Println(err.Error())
+		log.Println(err)
 	}
 
+	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		err = json.NewEncoder(w).Encode(fmt.Sprintf(messageTemplate, "not logged in"))
-		if err != nil {
-			panic(err)
-		}
-		return
-	}
-
-	var user conf.User
-
-	w.Header().Add("Content-Type", "application/json")
-
-	body, err := ioutil.ReadAll(io.Reader(r.Body))
-	if err != nil {
-		panic(err)
-	}
-
-	err = r.Body.Close()
-	if err != nil {
-		panic(err)
-	}
-
-	err = json.Unmarshal(body, &user)
-	if err != nil {
-		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, err.Error())
+		message := fmt.Sprintf(messageTemplate, "not logged in")
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			panic(err)
+			log.Fatalln(err)
 		}
+
 		return
 	}
 
-	user.Username = username.Value
-	informerConfig.ChangePassword(user)
+	//Parse passwords from request body
+	var passwords PasswordBundle
+	err = json.Unmarshal(body, &passwords)
+	if err != nil {
+		log.Println(err.Error())
 
+		w.WriteHeader(500)
+		message := fmt.Sprintf(messageTemplate, "data not correctly")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln(err.Error())
+		}
+
+		return
+	}
+
+	//Confirm and change password
+	user := conf.User{Username: username.Value, Password: passwords.Old}
+	if passwords.New == passwords.Confirm && informerConfig.CheckUser(user) {
+		user.Password = passwords.New
+		informerConfig.ChangePassword(user)
+	}
+
+	//Write informer configurations
 	err = informerConfig.WriteConfig()
 	if err != nil {
-		panic(err)
+		w.WriteHeader(500)
+		log.Fatalln(err.Error())
+	}
+
+	w.WriteHeader(200)
+	message := fmt.Sprintf(messageTemplate, "success")
+	err = json.NewEncoder(w).Encode(message)
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err.Error())
 	}
 }
