@@ -639,6 +639,15 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	if passwords.New == passwords.Confirm && informerConfig.CheckUser(user) {
 		user.Password = passwords.New
 		informerConfig.ChangePassword(user)
+	} else {
+		w.WriteHeader(500)
+		message := fmt.Sprintf(messageTemplate, "data not correctly")
+		err = json.NewEncoder(w).Encode(message)
+		if err != nil {
+			log.Fatalln()
+		}
+
+		return
 	}
 
 	//Write informer configurations
