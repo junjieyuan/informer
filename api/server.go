@@ -568,9 +568,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 type PasswordBundle struct {
-	Old     string `json:"old"`
-	New     string `json:"new"`
-	Confirm string `json:"confirm"`
+	OldPassword     string `json:"old-password"`
+	NewPassword     string `json:"new-password"`
+	ConfirmPassword string `json:"confirm-password"`
 }
 
 //Change user's password
@@ -636,9 +636,9 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Confirm and change password
-	user := conf.User{Username: username.Value, Password: passwords.Old}
-	if passwords.New == passwords.Confirm && informerConfig.CheckUser(user) {
-		user.Password = passwords.New
+	user := conf.User{Username: username.Value, Password: passwords.OldPassword}
+	if passwords.NewPassword == passwords.ConfirmPassword && informerConfig.CheckUser(user) {
+		user.Password = passwords.NewPassword
 		informerConfig.ChangePassword(user)
 	} else {
 		w.WriteHeader(500)
@@ -737,9 +737,9 @@ func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Change password when they correctly
-	if passwords.New == passwords.Confirm {
+	if passwords.NewPassword == passwords.ConfirmPassword {
 		//Unlock informer library using old password
-		err = informerLibrary.Unlock([]byte(passwords.Old))
+		err = informerLibrary.Unlock([]byte(passwords.OldPassword))
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(500)
@@ -753,7 +753,7 @@ func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 		}
 
 		//Lock informer library using new password
-		err = informerLibrary.Lock([]byte(passwords.New))
+		err = informerLibrary.Lock([]byte(passwords.NewPassword))
 		if err != nil {
 			w.WriteHeader(500)
 			log.Println(err.Error())
