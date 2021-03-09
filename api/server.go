@@ -20,6 +20,7 @@ func Serve() {
 	router := mux.NewRouter().StrictSlash(true)
 
 	router.HandleFunc("/login", Login)
+	router.HandleFunc("/logout", Logout)
 
 	router.HandleFunc("/libraries", List)
 	router.HandleFunc("/libraries/add", Add)
@@ -785,5 +786,49 @@ func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(500)
 		log.Fatalln(err.Error())
+	}
+}
+
+func Logout(w http.ResponseWriter, r *http.Request) {
+	//Response message is json
+	w.Header().Add("Content-Type", "application/json")
+
+	//Read informer configurations
+	informerConfig, err := conf.ReadConfig()
+	if err != nil {
+		w.WriteHeader(500)
+		log.Fatalln(err)
+	}
+
+	//Read login token from cookie
+	username, err := r.Cookie("username")
+	if err != nil {
+		log.Println(err)
+	}
+	tokenId, err := r.Cookie("token")
+	if err != nil {
+		log.Println(err)
+	}
+
+	//If user already logged in, remove token
+	if username != nil && tokenId != nil && informerConfig.CheckLogin(username.Value, tokenId.Value) {
+		//Remove token
+		token := conf.Token{ID: tokenId.Value}
+		informerConfig.RemoveToken(token)
+
+		//Write informer configurations
+		err = informerConfig.WriteConfig()
+		if err != nil {
+			w.WriteHeader(500)
+			log.Fatalln(err.Error())
+		}
+	}
+
+	//Return 200 success
+	w.WriteHeader(200)
+	message := fmt.Sprintf(messageTemplate, "success")
+	err = json.NewEncoder(w).Encode(message)
+	if err != nil {
+		log.Fatalln(err)
 	}
 }

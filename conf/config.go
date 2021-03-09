@@ -128,3 +128,14 @@ func (informerConfig *InformerConfig) ChangePassword(newUser User) {
 		informerConfig.User.Tokens = nil
 	}
 }
+
+func (informerConfig *InformerConfig) RemoveToken(token Token) {
+	for index, tokenItem := range informerConfig.User.Tokens {
+		if token.ID == tokenItem.ID {
+			informerConfig.User.Tokens =
+				append(informerConfig.User.Tokens[:index], informerConfig.User.Tokens[index+1:]...)
+
+			return
+		}
+	}
+}
