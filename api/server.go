@@ -568,9 +568,9 @@ func Update(w http.ResponseWriter, r *http.Request) {
 }
 
 type PasswordBundle struct {
-	OldPassword     string `json:"old-password"`
-	NewPassword     string `json:"new-password"`
-	ConfirmPassword string `json:"confirm-password"`
+	OldPassword     string `json:"oldPassword"`
+	NewPassword     string `json:"newPassword"`
+	ConfirmPassword string `json:"confirmPassword"`
 }
 
 //Change user's password
