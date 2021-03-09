@@ -27,7 +27,7 @@ type User struct {
 
 type Token struct {
 	ID         string    `json:"id" yaml:"id"`
-	CreateDate time.Time `json:"create-date" yaml:"create-date"`
+	CreateDate time.Time `json:"createDate" yaml:"create-date"`
 }
 
 func ReadConfig() (InformerConfig, error) {
