@@ -7,11 +7,16 @@ import (
 	"encoding/base64"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"gopkg.in/yaml.v2"
+)
+
+var (
+	dataDefault = InformerLibrary{Version: "0.1", Unlocked: true}
 )
 
 type InformerLibrary struct {
@@ -35,6 +40,21 @@ func ReadLibrary() (InformerLibrary, error) {
 	dataLocation, err := dataPath()
 	if err != nil {
 		return InformerLibrary{}, err
+	}
+	dataDir := filepath.Dir(dataLocation)
+
+	//If data directory doesn't exists, create it
+	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
+		log.Println("Data dir not exists, creating it")
+		err = os.MkdirAll(dataDir, 0755)
+		if err != nil {
+			return InformerLibrary{}, err
+		}
+	}
+	//If data file doesn't not exists, return default data
+	if _, err := os.Stat(dataLocation); os.IsNotExist(err) {
+		log.Println("Data file not exists, using default data")
+		return dataDefault, nil
 	}
 
 	libraryFile, err := ioutil.ReadFile(dataLocation)
