@@ -6,6 +6,7 @@ import (
 	"golang.org/x/crypto/sha3"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -32,6 +33,20 @@ type Token struct {
 
 func ReadConfig() (InformerConfig, error) {
 	configLocation, err := configPath()
+	configDir := filepath.Dir(configLocation)
+	//If data directory doesn't exists, create it
+	if _, err := os.Stat(configDir); os.IsNotExist(err) {
+		log.Println("Configuration directory not exists, creating it")
+		err = os.MkdirAll(configDir, 0755)
+		if err != nil {
+			return InformerConfig{}, err
+		}
+	}
+	//If data file doesn't not exists, return default data
+	if _, err := os.Stat(configLocation); os.IsNotExist(err) {
+		log.Fatalln("Configuration file doesn't exists, please create it first")
+	}
+
 	informerConfig := InformerConfig{}
 
 	if err != nil {

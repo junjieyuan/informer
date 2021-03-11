@@ -45,7 +45,7 @@ func ReadLibrary() (InformerLibrary, error) {
 
 	//If data directory doesn't exists, create it
 	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-		log.Println("Data dir not exists, creating it")
+		log.Println("Data directory not exists, creating it")
 		err = os.MkdirAll(dataDir, 0755)
 		if err != nil {
 			return InformerLibrary{}, err

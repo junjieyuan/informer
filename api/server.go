@@ -30,17 +30,13 @@ func Serve() {
 	router.HandleFunc("/change-password", ChangePassword)
 	router.HandleFunc("/change-master-password", ChangeMasterPassword)
 
-	//Listen on specific port, if port not set, using 8080
+	//Listen on specific port
 	informer, err := conf.ReadConfig()
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	var port string
-	if informer.Port == "" {
-		port = ":8080"
-	} else {
-		port = ":" + informer.Port
-	}
+	port := ":" + informer.Port
+
 	log.Fatalln(http.ListenAndServe(port, router))
 }
 
