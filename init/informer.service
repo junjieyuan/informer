@@ -1,0 +1,13 @@
+[Unit]
+Description=Informer server
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Restart=on-failure
+ExecStart=/home/junjie/go/bin/informer --server
+KillMode=control-group
+Type=simple
+
+[Install]
+WantedBy=default.target multi-user.target
