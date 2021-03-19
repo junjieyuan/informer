@@ -832,6 +832,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func GeneratePasswordApi(w http.ResponseWriter, r *http.Request) {
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(200)
 
 	//Generate 16 characters password
