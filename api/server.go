@@ -30,7 +30,7 @@ func Serve() {
 	router.HandleFunc("/change-password", ChangePassword)
 	router.HandleFunc("/change-master-password", ChangeMasterPassword)
 
-	router.HandleFunc("/generate-password", GeneratePasswordApi)
+	router.HandleFunc("/generate-password", GeneratePassword)
 
 	//Listen on specific port
 	informer, err := conf.ReadConfig()
@@ -828,19 +828,5 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(message)
 	if err != nil {
 		log.Fatalln(err)
-	}
-}
-
-func GeneratePasswordApi(w http.ResponseWriter, r *http.Request) {
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(200)
-
-	//Generate 16 characters password
-	password := GeneratePassword(16)
-
-	message := fmt.Sprintf(messageTemplate, password)
-	err := json.NewEncoder(w).Encode(message)
-	if err != nil {
-		log.Fatalln(err.Error())
 	}
 }

@@ -1,6 +1,11 @@
 package api
 
-import "math/rand"
+import (
+	"encoding/json"
+	"log"
+	"math/rand"
+	"net/http"
+)
 
 var (
 	lowerCase = "abcdefghijklmnopqrstuvwxyz"
@@ -11,7 +16,24 @@ var (
 	passwordDict = lowerCase + upperCase + number + symbol
 )
 
-func GeneratePassword(length uint) string {
+func GeneratePassword(w http.ResponseWriter, r *http.Request) {
+	//Response message is json
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(200)
+
+	//Generate 16 characters password
+	password := generatePassword(16)
+
+	//Return generated password and success
+	message := SinglePasswordWithMessage{Password: password, Message: "success"}
+
+	err := json.NewEncoder(w).Encode(message)
+	if err != nil {
+		log.Println(err.Error())
+	}
+}
+
+func generatePassword(length uint) string {
 	var password string
 
 	var i uint = 0
@@ -21,4 +43,9 @@ func GeneratePassword(length uint) string {
 	}
 
 	return password
+}
+
+type SinglePasswordWithMessage struct {
+	Password string `json:"password"`
+	Message  string `json:"message"`
 }
