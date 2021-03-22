@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"junjie.pro/informer/conf"
@@ -212,8 +211,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		message := fmt.Sprintf(messageTemplate, "not logged in")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(NotLoggedInMessage)
 		if err != nil {
 			log.Println(err)
 		}
@@ -228,7 +226,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
+		message := Message{Message: "data not correctly"}
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			log.Println(err.Error())
@@ -244,7 +242,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		informerConfig.ChangePassword(user)
 	} else {
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
+		message := Message{Message: "data not correctly"}
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			log.Println(err.Error())
@@ -261,8 +259,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(200)
-	message := fmt.Sprintf(messageTemplate, "success")
-	err = json.NewEncoder(w).Encode(message)
+	err = json.NewEncoder(w).Encode(SuccessMessage)
 	if err != nil {
 		w.WriteHeader(500)
 		log.Println(err.Error())
