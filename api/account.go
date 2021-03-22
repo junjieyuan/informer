@@ -18,19 +18,19 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(io.Reader(r.Body))
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	err = r.Body.Close()
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	//Read informer configurations
 	informerConfig, err := conf.ReadConfig()
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	//Read login token from cookie
@@ -48,7 +48,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		err = json.NewEncoder(w).Encode(SuccessMessage)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 
 		return
@@ -62,7 +62,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		message := Message{Message: err.Error()}
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 
 		return
@@ -81,7 +81,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		err = informerConfig.WriteConfig()
 		if err != nil {
 			w.WriteHeader(500)
-			log.Fatalln(err)
+			log.Println(err)
 		}
 
 		//Set cookie: username and token
@@ -119,14 +119,14 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(200)
 		err = json.NewEncoder(w).Encode(SuccessMessage)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 	} else {
 		w.WriteHeader(401)
 		message := Message{Message: "username or password not correctly"}
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 	}
 }
