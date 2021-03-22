@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"junjie.pro/informer/conf"
@@ -36,8 +35,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		message := fmt.Sprintf(messageTemplate, "not logged in")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(NotLoggedInMessage)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -58,8 +56,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(500)
-			message := fmt.Sprintf(messageTemplate, "data not correctly")
-			err = json.NewEncoder(w).Encode(message)
+			err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 			if err != nil {
 				log.Fatalln(err.Error())
 			}
@@ -129,8 +126,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		message := fmt.Sprintf(messageTemplate, "not logged in")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(NotLoggedInMessage)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -143,8 +139,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &secureNKey)
 	if err != nil {
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -161,8 +156,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -189,8 +183,7 @@ func Add(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(200)
-	message := fmt.Sprintf(messageTemplate, "success")
-	err = json.NewEncoder(w).Encode(message)
+	err = json.NewEncoder(w).Encode(SuccessMessage)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -232,8 +225,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		message := fmt.Sprintf(messageTemplate, "not logged in")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(NotLoggedInMessage)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -246,8 +238,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &secures)
 	if err != nil {
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -279,8 +270,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(200)
-	message := fmt.Sprintf(messageTemplate, "success")
-	err = json.NewEncoder(w).Encode(message)
+	err = json.NewEncoder(w).Encode(SuccessMessage)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -323,8 +313,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		message := fmt.Sprintf(messageTemplate, "not logged in")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(NotLoggedInMessage)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -339,8 +328,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -351,7 +339,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	//Must send 2 secures, the first is origin, and the second is updated
 	if len(secureNKey.Secure) != 2 {
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "array must have 2 secure")
+		message := Message{Message: "array must have 2 secure"}
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			log.Fatalln(err.Error())
@@ -370,8 +358,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println(err.Error())
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -405,8 +392,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 
 	//Return 200 success
 	w.WriteHeader(200)
-	message := fmt.Sprintf(messageTemplate, "success")
-	err = json.NewEncoder(w).Encode(message)
+	err = json.NewEncoder(w).Encode(SuccessMessage)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -455,8 +441,7 @@ func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 	//Check user is already logged in whether
 	if username == nil || tokenId == nil || !informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(403)
-		message := fmt.Sprintf(messageTemplate, "not logged in")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(NotLoggedInMessage)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -471,8 +456,7 @@ func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
@@ -494,8 +478,7 @@ func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println(err.Error())
 			w.WriteHeader(500)
-			message := fmt.Sprintf(messageTemplate, "data not correctly")
-			err = json.NewEncoder(w).Encode(message)
+			err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 			if err != nil {
 				log.Fatalln(err.Error())
 			}
@@ -521,8 +504,7 @@ func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 	} else {
 		//If passwords not correctly, return 500 data not correctly
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, "data not correctly")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
 		if err != nil {
 			log.Fatalln()
 		}
@@ -531,8 +513,7 @@ func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(200)
-	message := fmt.Sprintf(messageTemplate, "success")
-	err = json.NewEncoder(w).Encode(message)
+	err = json.NewEncoder(w).Encode(SuccessMessage)
 	if err != nil {
 		w.WriteHeader(500)
 		log.Fatalln(err.Error())

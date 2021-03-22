@@ -7,8 +7,6 @@ import (
 	"net/http"
 )
 
-const messageTemplate = "{\"message\": \"%s\"}"
-
 func Serve() {
 	log.Println("Starting server")
 	router := mux.NewRouter().StrictSlash(true)
