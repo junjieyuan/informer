@@ -140,7 +140,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	informerConfig, err := conf.ReadConfig()
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	//Read login token from cookie
@@ -163,7 +163,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		err = informerConfig.WriteConfig()
 		if err != nil {
 			w.WriteHeader(500)
-			log.Fatalln(err.Error())
+			log.Println(err.Error())
 		}
 	}
 
@@ -172,6 +172,6 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	message := fmt.Sprintf(messageTemplate, "success")
 	err = json.NewEncoder(w).Encode(message)
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 	}
 }
