@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"junjie.pro/informer/conf"
@@ -47,8 +46,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	//Check user is already logged in whether
 	if username != nil && tokenId != nil && informerConfig.CheckLogin(username.Value, tokenId.Value) {
 		w.WriteHeader(200)
-		message := fmt.Sprintf(messageTemplate, "success")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(SuccessMessage)
 		if err != nil {
 			log.Fatalln(err)
 		}
@@ -61,7 +59,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	err = json.Unmarshal(body, &user)
 	if err != nil {
 		w.WriteHeader(500)
-		message := fmt.Sprintf(messageTemplate, err.Error())
+		message := Message{Message: err.Error()}
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			log.Fatalln(err)
@@ -119,14 +117,13 @@ func Login(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &tokenCookie)
 
 		w.WriteHeader(200)
-		message := fmt.Sprintf(messageTemplate, "success")
-		err = json.NewEncoder(w).Encode(message)
+		err = json.NewEncoder(w).Encode(SuccessMessage)
 		if err != nil {
 			log.Fatalln(err)
 		}
 	} else {
 		w.WriteHeader(401)
-		message := fmt.Sprintf(messageTemplate, "username or password not correctly")
+		message := Message{Message: "username or password not correctly"}
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			log.Fatalln(err)
