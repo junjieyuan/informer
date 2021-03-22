@@ -4,4 +4,6 @@ RUN CGO_ENABLED=0 go get junjie.pro/informer
 FROM scratch AS runner
 COPY --from=builder /go/bin/informer /informer
 VOLUME ["/.config/informer", "/.local/share/informer"]
-ENTRYPOINT ["/informer", "--server"]
+ENTRYPOINT ["/informer"]
+# Run as server by default
+CMD ["--server"]
