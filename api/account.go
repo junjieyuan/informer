@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"junjie.pro/informer/conf"
@@ -169,8 +168,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	//Return 200 success
 	w.WriteHeader(200)
-	message := fmt.Sprintf(messageTemplate, "success")
-	err = json.NewEncoder(w).Encode(message)
+	err = json.NewEncoder(w).Encode(SuccessMessage)
 	if err != nil {
 		log.Println(err)
 	}
