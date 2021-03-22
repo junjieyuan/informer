@@ -205,7 +205,6 @@ func printSecureStore(secure library.SecureStore, showSecure bool) {
 	fmt.Println("id:", secure.ID)
 	fmt.Println("platform:", secure.Platform)
 	fmt.Println("friendly name:", secure.FriendlyName)
-	fmt.Println("icon:", secure.Icon)
 	fmt.Println("username:", secure.Username)
 
 	if showSecure {
@@ -219,7 +218,7 @@ func printSecureStore(secure library.SecureStore, showSecure bool) {
 
 func inputSecureStore() library.SecureStore {
 	scanner := bufio.NewScanner(os.Stdin)
-	var id, platform, friendlyName, icon, username, password, otp, otpType string
+	var id, platform, friendlyName, username, password, otp, otpType string
 
 	fmt.Println("Input information:")
 
@@ -234,10 +233,6 @@ func inputSecureStore() library.SecureStore {
 	fmt.Print("friendly name: ")
 	scanner.Scan()
 	friendlyName = scanner.Text()
-
-	fmt.Print("icon: ")
-	scanner.Scan()
-	icon = scanner.Text()
 
 	fmt.Print("username: ")
 	scanner.Scan()
@@ -259,7 +254,6 @@ func inputSecureStore() library.SecureStore {
 		ID:           id,
 		Platform:     platform,
 		FriendlyName: friendlyName,
-		Icon:         icon,
 		Username:     username,
 		Password:     password,
 		OTP:          otp,
