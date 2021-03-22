@@ -47,7 +47,7 @@ func main() {
 	}
 
 	if version {
-		fmt.Println("Informer 0.0.8")
+		fmt.Println("Informer 0.0.9")
 		return
 	}
 
