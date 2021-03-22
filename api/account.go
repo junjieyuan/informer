@@ -184,19 +184,19 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	body, err := ioutil.ReadAll(io.Reader(r.Body))
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err)
+		log.Println(err)
 	}
 	err = r.Body.Close()
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	//Read informer configurations
 	informerConfig, err := conf.ReadConfig()
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err)
+		log.Println(err)
 	}
 
 	//Read login token from cookie
@@ -215,7 +215,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		message := fmt.Sprintf(messageTemplate, "not logged in")
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 
 		return
@@ -231,7 +231,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		message := fmt.Sprintf(messageTemplate, "data not correctly")
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			log.Fatalln(err.Error())
+			log.Println(err.Error())
 		}
 
 		return
@@ -247,7 +247,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 		message := fmt.Sprintf(messageTemplate, "data not correctly")
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
-			log.Fatalln()
+			log.Println(err.Error())
 		}
 
 		return
@@ -257,7 +257,7 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	err = informerConfig.WriteConfig()
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err.Error())
+		log.Println(err.Error())
 	}
 
 	w.WriteHeader(200)
@@ -265,6 +265,6 @@ func ChangePassword(w http.ResponseWriter, r *http.Request) {
 	err = json.NewEncoder(w).Encode(message)
 	if err != nil {
 		w.WriteHeader(500)
-		log.Fatalln(err.Error())
+		log.Println(err.Error())
 	}
 }
