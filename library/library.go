@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/base64"
+	"github.com/google/uuid"
 	"io"
 	"io/ioutil"
 	"log"
@@ -20,9 +21,9 @@ var (
 )
 
 type InformerLibrary struct {
-	Version     string        `json:"version" yaml:"version"`
-	Unlocked    bool          `json:"unlocked" yaml:"unlocked"`
-	SecureStore []SecureStore `json:"libraries" yaml:"libraries"`
+	Version     string                  `json:"version" yaml:"version"`
+	Unlocked    bool                    `json:"unlocked" yaml:"unlocked"`
+	SecureStore map[string]*SecureStore `json:"libraries" yaml:"libraries"`
 }
 
 type SecureStore struct {
@@ -67,6 +68,10 @@ func ReadLibrary() (InformerLibrary, error) {
 		return InformerLibrary{}, err
 	}
 
+	if informerLibrary.SecureStore == nil {
+		informerLibrary.SecureStore = map[string]*SecureStore{}
+	}
+
 	return informerLibrary, nil
 }
 
@@ -106,18 +111,18 @@ func dataPath() (string, error) {
 
 func (informerLibrary *InformerLibrary) Lock(key []byte) error {
 	if informerLibrary.Unlocked {
-		for i := 0; i < len(informerLibrary.SecureStore); i++ {
-			encryptedPassword, err := encrypt(key, informerLibrary.SecureStore[i].Password)
+		for k, v := range informerLibrary.SecureStore {
+			encryptedPassword, err := encrypt(key, v.Password)
 			if err != nil {
 				return err
 			}
-			encryptedOTP, err := encrypt(key, informerLibrary.SecureStore[i].OTP)
+			encryptedOTP, err := encrypt(key, v.OTP)
 			if err != nil {
 				return err
 			}
 
-			informerLibrary.SecureStore[i].Password = encryptedPassword
-			informerLibrary.SecureStore[i].OTP = encryptedOTP
+			informerLibrary.SecureStore[k].Password = encryptedPassword
+			informerLibrary.SecureStore[k].OTP = encryptedOTP
 		}
 		informerLibrary.Unlocked = false
 		return nil
@@ -131,18 +136,18 @@ func (informerLibrary *InformerLibrary) Unlock(key []byte) error {
 		return nil
 	}
 
-	for i := 0; i < len(informerLibrary.SecureStore); i++ {
-		decryptedPassword, err := decrypt(key, informerLibrary.SecureStore[i].Password)
+	for k, v := range informerLibrary.SecureStore {
+		decryptedPassword, err := decrypt(key, v.Password)
 		if err != nil {
 			return err
 		}
-		decryptedOTP, err := decrypt(key, informerLibrary.SecureStore[i].OTP)
+		decryptedOTP, err := decrypt(key, v.OTP)
 		if err != nil {
 			return err
 		}
 
-		informerLibrary.SecureStore[i].Password = decryptedPassword
-		informerLibrary.SecureStore[i].OTP = decryptedOTP
+		informerLibrary.SecureStore[k].Password = decryptedPassword
+		informerLibrary.SecureStore[k].OTP = decryptedOTP
 	}
 
 	informerLibrary.Unlocked = true
@@ -197,22 +202,23 @@ func decrypt(key []byte, encryptedMessage string) (decryptedMessage string, err 
 	return
 }
 
-//Add SecureStore as the latest element of queue.
+//Add SecureStore.
 func (informerLibrary *InformerLibrary) Add(secure SecureStore) {
-	informerLibrary.SecureStore = append(informerLibrary.SecureStore, secure)
+	k := uuid.NewString()
+	informerLibrary.SecureStore[k] = &secure
 }
 
-//Delete SecureStore at given index.
-func (informerLibrary *InformerLibrary) Remove(i int) {
-	informerLibrary.SecureStore = append(informerLibrary.SecureStore[0:i], informerLibrary.SecureStore[i+1:]...)
+//Delete SecureStore.
+func (informerLibrary *InformerLibrary) Remove(k string) {
+	delete(informerLibrary.SecureStore, k)
 }
 
-//Using given SecureStore to update SecureStore that at given index.
-func (informerLibrary *InformerLibrary) Update(i int, secure SecureStore) {
-	informerLibrary.SecureStore[i] = secure
+//Using given SecureStore to update specified SecureStore.
+func (informerLibrary *InformerLibrary) Update(k string, secure SecureStore) {
+	informerLibrary.SecureStore[k] = &secure
 }
 
-//If found, return true and indexes, else return false and nil.
+//If found, return true and array of SecureStore, else return false and nil.
 func (informerLibrary InformerLibrary) Query(text string) (bool, []SecureStore) {
 	text = strings.ToLower(text)
 	var results []SecureStore
@@ -224,33 +230,19 @@ func (informerLibrary InformerLibrary) Query(text string) (bool, []SecureStore) 
 			strings.Contains(strings.ToLower(secure.Username), text) {
 
 			found = true
-			results = append(results, secure)
+			results = append(results, *secure)
 		}
 	}
 
 	return found, results
 }
 
-//If found, return true and index, else return false and -1.
-func (informerLibrary InformerLibrary) QueryPrimaryKey(id, platform, username string) (bool, int) {
-	for i, secure := range informerLibrary.SecureStore {
-		if strings.EqualFold(secure.ID, id) &&
-			strings.EqualFold(secure.Platform, platform) &&
-			strings.EqualFold(secure.Username, username) {
-
-			return true, i
-		}
-	}
-
-	return false, -1
-}
-
-//Return all of SecureStore
+//Return all of SecureStore.
 func (informerLibrary InformerLibrary) List() []SecureStore {
 	var results []SecureStore
 
-	for _, secureStore := range informerLibrary.SecureStore {
-		results = append(results, secureStore)
+	for _, secure := range informerLibrary.SecureStore {
+		results = append(results, *secure)
 	}
 
 	return results
