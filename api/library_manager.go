@@ -79,7 +79,7 @@ func List(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//If not given any query string, just list all of secures without decrypt
-	err = json.NewEncoder(w).Encode(informerLibrary.SecureStore)
+	err = json.NewEncoder(w).Encode(informerLibrary.List())
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
