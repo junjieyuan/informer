@@ -6,7 +6,10 @@ import (
 	"fmt"
 	"junjie.pro/informer/api"
 	"junjie.pro/informer/library"
+	"log"
 	"os"
+	"strconv"
+	"strings"
 )
 
 var (
@@ -81,39 +84,31 @@ func main() {
 	}
 
 	if flagSet["remove"] {
-		if key == "" {
-			panic("key is empty")
-		}
-
 		scanner := bufio.NewScanner(os.Stdin)
 
-		fmt.Println("Input information:")
+		fmt.Println("Which secure do you want to remove?")
+		fmt.Println()
 
-		fmt.Print("id: ")
+		numberMapper := map[int64]string{}
+		var i int64 = 0
+		for k, v := range informerLibrary.SecureStore {
+			elements := []string{strconv.FormatInt(i, 10), v.ID, v.Username}
+			fmt.Println(strings.Join(elements, ", "))
+			numberMapper[i] = k
+			i++
+		}
+
+		fmt.Println()
+		fmt.Print("number: ")
 		scanner.Scan()
 		id := scanner.Text()
+		num, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			log.Println(err.Error())
+		}
 
-		fmt.Print("platform: ")
-		scanner.Scan()
-		platform := scanner.Text()
-
-		fmt.Print("username: ")
-		scanner.Scan()
-		username := scanner.Text()
-
-		found, index := informerLibrary.QueryPrimaryKey(id, platform, username)
-		if found {
-			err := informerLibrary.Unlock([]byte(key))
-			if err != nil {
-				panic(err)
-			}
-
-			informerLibrary.Remove(index)
-
-			err = informerLibrary.Lock([]byte(key))
-			if err != nil {
-				panic(err)
-			}
+		if num >= 0 {
+			informerLibrary.Remove(numberMapper[num])
 
 			err = informerLibrary.WriteLibrary()
 			if err != nil {
@@ -128,26 +123,30 @@ func main() {
 	}
 
 	if flagSet["update"] {
-		fmt.Print("Update which Secure? ")
-
 		scanner := bufio.NewScanner(os.Stdin)
 
-		fmt.Println("Input information:")
+		fmt.Println("Which secure do you want to update?")
+		fmt.Println()
 
-		fmt.Print("id: ")
+		numberMapper := map[int64]string{}
+		var i int64 = 0
+		for k, v := range informerLibrary.SecureStore {
+			elements := []string{strconv.FormatInt(i, 10), v.ID, v.Username}
+			fmt.Println(strings.Join(elements, ", "))
+			numberMapper[i] = k
+			i++
+		}
+
+		fmt.Println()
+		fmt.Print("number: ")
 		scanner.Scan()
 		id := scanner.Text()
+		num, err := strconv.ParseInt(id, 10, 64)
+		if err != nil {
+			log.Println(err.Error())
+		}
 
-		fmt.Print("platform: ")
-		scanner.Scan()
-		platform := scanner.Text()
-
-		fmt.Print("username: ")
-		scanner.Scan()
-		username := scanner.Text()
-
-		found, index := informerLibrary.QueryPrimaryKey(id, platform, username)
-		if found {
+		if num >= 0 {
 			newSecure := inputSecureStore()
 
 			err = informerLibrary.Unlock([]byte(key))
@@ -155,7 +154,7 @@ func main() {
 				panic(err)
 			}
 
-			informerLibrary.Update(index, newSecure)
+			informerLibrary.Update(numberMapper[num], newSecure)
 
 			err = informerLibrary.Lock([]byte(key))
 			if err != nil {
@@ -175,7 +174,7 @@ func main() {
 	}
 
 	if flagSet["list"] {
-		if showSecure {
+		if showSecure && key != "" {
 			err := informerLibrary.Unlock([]byte(key))
 			if err != nil {
 				panic(err)
@@ -188,6 +187,13 @@ func main() {
 	}
 
 	if flagSet["query"] {
+		if showSecure && key != "" {
+			err := informerLibrary.Unlock([]byte(key))
+			if err != nil {
+				log.Println(err.Error())
+			}
+		}
+
 		found, secures := informerLibrary.Query(query)
 		if found {
 			for _, secure := range secures {
