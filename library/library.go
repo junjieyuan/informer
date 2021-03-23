@@ -218,19 +218,19 @@ func (informerLibrary *InformerLibrary) Update(k string, secure SecureStore) {
 	informerLibrary.SecureStore[k] = &secure
 }
 
-//If found, return true and array of SecureStore, else return false and nil.
-func (informerLibrary InformerLibrary) Query(text string) (bool, []SecureStore) {
+//If found, return true and map of primary key and SecureStore, else return false and nil.
+func (informerLibrary InformerLibrary) Query(text string) (bool, map[string]SecureStore) {
 	text = strings.ToLower(text)
-	var results []SecureStore
+	results := map[string]SecureStore{}
 	found := false
 
-	for _, secure := range informerLibrary.SecureStore {
+	for k, secure := range informerLibrary.SecureStore {
 		if strings.Contains(strings.ToLower(secure.ID), text) ||
 			strings.Contains(strings.ToLower(secure.FriendlyName), text) ||
 			strings.Contains(strings.ToLower(secure.Username), text) {
 
 			found = true
-			results = append(results, *secure)
+			results[k] = *secure
 		}
 	}
 
@@ -238,11 +238,11 @@ func (informerLibrary InformerLibrary) Query(text string) (bool, []SecureStore) 
 }
 
 //Return all of SecureStore.
-func (informerLibrary InformerLibrary) List() []SecureStore {
-	var results []SecureStore
+func (informerLibrary InformerLibrary) List() map[string]SecureStore {
+	results := map[string]SecureStore{}
 
-	for _, secure := range informerLibrary.SecureStore {
-		results = append(results, *secure)
+	for k, v := range informerLibrary.SecureStore {
+		results[k] = *v
 	}
 
 	return results
