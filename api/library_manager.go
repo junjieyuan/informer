@@ -233,8 +233,8 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Parse secure(s) from request body
-	var secures []library.SecureStore
+	//Parse secure(s)' key from request body
+	var secures PrimaryKeys
 	err = json.Unmarshal(body, &secures)
 	if err != nil {
 		w.WriteHeader(500)
@@ -253,11 +253,8 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Find index of secure and remove it
-	for _, secure := range secures {
-		found, index := informerLibrary.QueryPrimaryKey(secure.ID, secure.Platform, secure.Username)
-		if found {
-			informerLibrary.Remove(index)
-		}
+	for _, secure := range secures.PrimaryKey {
+		informerLibrary.Remove(secure)
 	}
 
 	//Write informer library
@@ -322,7 +319,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Parse encryption key and secure(s) from request body
-	var secureNKey secureWithKey
+	var secureNKey PrimaryKeyWithSecures
 	err = json.Unmarshal(body, &secureNKey)
 	if err != nil {
 		log.Println(err.Error())
@@ -337,15 +334,16 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Must send 2 secures, the first is origin, and the second is updated
-	if len(secureNKey.Secure) != 2 {
+	if secureNKey.PrimaryKey == "" || len(secureNKey.Secures) != 1 {
 		w.WriteHeader(500)
-		message := Message{Message: "array must have 2 secure"}
+		message := Message{Message: "array must have 1 Primary Key and 1 secure"}
 		err = json.NewEncoder(w).Encode(message)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}
+
+		return
 	}
-	original, updated := secureNKey.Secure[0], secureNKey.Secure[1]
 
 	//Read informer library
 	informerLibrary, err := library.ReadLibrary()
@@ -367,10 +365,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Using origin secure to find index and replace by updated secure
-	found, index := informerLibrary.QueryPrimaryKey(original.ID, original.Platform, original.Username)
-	if found {
-		informerLibrary.Update(index, updated)
-	}
+	informerLibrary.Update(secureNKey.PrimaryKey, secureNKey.Secures[0])
 
 	//Lock informer library
 	err = informerLibrary.Lock([]byte(secureNKey.Key))
