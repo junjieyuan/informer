@@ -22,3 +22,9 @@ type PrimaryKeyWithSecures struct {
 	Key        string                `json:"key"`
 	Secures    []library.SecureStore `json:"secure"`
 }
+
+type PasswordBundle struct {
+	OldPassword     string `json:"oldPassword"`
+	NewPassword     string `json:"newPassword"`
+	ConfirmPassword string `json:"confirmPassword"`
+}

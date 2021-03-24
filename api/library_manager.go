@@ -393,12 +393,6 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-type PasswordBundle struct {
-	OldPassword     string `json:"oldPassword"`
-	NewPassword     string `json:"newPassword"`
-	ConfirmPassword string `json:"confirmPassword"`
-}
-
 //Change user's master password
 func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 	//Response message is json
