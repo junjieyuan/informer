@@ -208,17 +208,17 @@ func (informerLibrary *InformerLibrary) Add(secure SecureStore) {
 	informerLibrary.SecureStore[k] = &secure
 }
 
-//Delete SecureStore.
+// Remove Delete SecureStore.
 func (informerLibrary *InformerLibrary) Remove(k string) {
 	delete(informerLibrary.SecureStore, k)
 }
 
-//Using given SecureStore to update specified SecureStore.
+// Update Using given SecureStore to update specified SecureStore.
 func (informerLibrary *InformerLibrary) Update(k string, secure SecureStore) {
 	informerLibrary.SecureStore[k] = &secure
 }
 
-//If found, return true and map of primary key and SecureStore, else return false and nil.
+// Query If found, return true and map of primary key and SecureStore, else return false and nil.
 func (informerLibrary InformerLibrary) Query(text string) (bool, map[string]SecureStore) {
 	text = strings.ToLower(text)
 	results := map[string]SecureStore{}
@@ -237,7 +237,7 @@ func (informerLibrary InformerLibrary) Query(text string) (bool, map[string]Secu
 	return found, results
 }
 
-//Return all of SecureStore.
+// List Return all of SecureStore.
 func (informerLibrary InformerLibrary) List() map[string]SecureStore {
 	results := map[string]SecureStore{}
 
