@@ -6,5 +6,5 @@ import (
 )
 
 func TestGeneratePassword(t *testing.T) {
-	fmt.Println(GeneratePassword(16))
+	fmt.Println(generatePassword(16))
 }
