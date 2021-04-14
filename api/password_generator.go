@@ -16,7 +16,7 @@ var (
 	passwordDict = lowerCase + upperCase + number + symbol
 )
 
-func GeneratePassword(w http.ResponseWriter, r *http.Request) {
+func GeneratePassword(w http.ResponseWriter, _ *http.Request) {
 	//Response message is json
 	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(200)
