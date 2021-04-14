@@ -10,7 +10,7 @@ import (
 	"net/http"
 )
 
-//Return all of secures or query by query string
+// List Return all of secures or query by query string
 func List(w http.ResponseWriter, r *http.Request) {
 	//Response message is json
 	w.Header().Add("Content-Type", "application/json")
@@ -273,7 +273,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Replace a secure by other one
+// Update Replace a secure by other one
 func Update(w http.ResponseWriter, r *http.Request) {
 	//Response message is json
 	w.Header().Add("Content-Type", "application/json")
@@ -393,7 +393,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Change user's master password
+// ChangeMasterPassword Change user's master password
 func ChangeMasterPassword(w http.ResponseWriter, r *http.Request) {
 	//Response message is json
 	w.Header().Add("Content-Type", "application/json")
