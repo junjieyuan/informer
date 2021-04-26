@@ -24,6 +24,8 @@ func Serve() {
 
 	router.HandleFunc("/generate-password", GeneratePassword)
 
+	router.HandleFunc("/otp", GeneratePassCode)
+
 	//Listen on specific port
 	informer, err := conf.ReadConfig()
 	if err != nil {
