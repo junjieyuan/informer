@@ -76,7 +76,7 @@ func GeneratePassCode(w http.ResponseWriter, r *http.Request) {
 	}
 
 	passCode := generatePassCode(otpSecret)
-	passCodeJson := OtpPassCode{PassCode: passCode}
+	passCodeJson := otpPassCode{PassCode: passCode}
 	err = json.NewEncoder(w).Encode(passCodeJson)
 	if err != nil {
 		log.Println(err.Error())
@@ -92,6 +92,6 @@ func generatePassCode(otpSecret string) string {
 	return passCode
 }
 
-type OtpPassCode struct {
-	PassCode string `json:"pass_code"`
+type otpPassCode struct {
+	PassCode string `json:"passCode"`
 }
