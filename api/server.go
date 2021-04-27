@@ -19,12 +19,12 @@ func Serve() {
 	router.HandleFunc("/libraries/remove", Remove)
 	router.HandleFunc("/libraries/update", Update)
 
+	router.HandleFunc("/library/{uuid}/otp", GeneratePassCode)
+
 	router.HandleFunc("/change-password", ChangePassword)
 	router.HandleFunc("/change-master-password", ChangeMasterPassword)
 
 	router.HandleFunc("/generate-password", GeneratePassword)
-
-	router.HandleFunc("/otp", GeneratePassCode)
 
 	//Listen on specific port
 	informer, err := conf.ReadConfig()

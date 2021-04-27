@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"github.com/pquerna/otp/totp"
 	"junjie.pro/informer/conf"
 	"junjie.pro/informer/library"
@@ -46,6 +47,8 @@ func GeneratePassCode(w http.ResponseWriter, r *http.Request) {
 	informerLibrary, err := library.ReadLibrary()
 	if err != nil {
 		log.Println(err.Error())
+
+		return
 	}
 
 	queryParams := r.URL.Query()
@@ -63,19 +66,15 @@ func GeneratePassCode(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	var otpSecret string
-	if queryParams["primaryKey"] != nil && queryParams["primaryKey"][0] != "" {
-		otpSecret = informerLibrary.SecureStore[queryParams["primaryKey"][0]].OTP
-	} else {
-		//TODO
-		return
-	}
+	pathVars := mux.Vars(r)
+	primaryKey := pathVars["uuid"]
+	otpSecret := informerLibrary.SecureStore[primaryKey].OTP
 	if otpSecret == "" {
 		//TODO return 404 if otp secret is empty string
 		return
 	}
 
-	passCode := generatePassCode(otpSecret)
+	passCode := generateTotpPassCode(otpSecret)
 	passCodeJson := otpPassCode{PassCode: passCode}
 	err = json.NewEncoder(w).Encode(passCodeJson)
 	if err != nil {
@@ -83,7 +82,7 @@ func GeneratePassCode(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func generatePassCode(otpSecret string) string {
+func generateTotpPassCode(otpSecret string) string {
 	passCode, err := totp.GenerateCode(otpSecret, time.Now())
 	if err != nil {
 		log.Println(err.Error())
