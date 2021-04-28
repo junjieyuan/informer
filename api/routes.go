@@ -39,7 +39,7 @@ var routes = Routes{
 	Route{
 		Name:        "Add",
 		Method:      "POST",
-		Pattern:     "/libraries/add",
+		Pattern:     "/library",
 		HandlerFunc: Add,
 	},
 	Route{
