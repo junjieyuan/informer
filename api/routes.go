@@ -50,8 +50,8 @@ var routes = Routes{
 	},
 	Route{
 		Name:        "Update",
-		Method:      "POST",
-		Pattern:     "/libraries/update",
+		Method:      "PUT",
+		Pattern:     "/library/{uuid}",
 		HandlerFunc: Update,
 	},
 	Route{

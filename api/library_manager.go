@@ -301,6 +301,8 @@ func Update(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	pathVars := mux.Vars(r)
+	primaryKey := pathVars["uuid"]
 	//Parse encryption key and secure(s) from request body
 	var secureNKey PrimaryKeyWithSecures
 	err = json.Unmarshal(body, &secureNKey)
@@ -317,7 +319,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Must send 2 secures, the first is origin, and the second is updated
-	if secureNKey.PrimaryKey == "" || len(secureNKey.Secures) != 1 {
+	if primaryKey == "" || len(secureNKey.Secures) != 1 {
 		w.WriteHeader(500)
 		message := Message{Message: "array must have 1 Primary Key and 1 secure"}
 		err = json.NewEncoder(w).Encode(message)
@@ -348,7 +350,7 @@ func Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Using origin secure to find index and replace by updated secure
-	informerLibrary.Update(secureNKey.PrimaryKey, secureNKey.Secures[0])
+	informerLibrary.Update(primaryKey, secureNKey.Secures[0])
 
 	//Lock informer library
 	err = informerLibrary.Lock([]byte(secureNKey.Key))
