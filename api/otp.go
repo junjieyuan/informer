@@ -3,12 +3,11 @@ package api
 import (
 	"encoding/json"
 	"github.com/gorilla/mux"
-	"github.com/pquerna/otp/totp"
 	"junjie.pro/informer/conf"
 	"junjie.pro/informer/library"
+	"junjie.pro/informer/pkg/otp"
 	"log"
 	"net/http"
-	"time"
 )
 
 func GeneratePassCode(w http.ResponseWriter, r *http.Request) {
@@ -74,21 +73,12 @@ func GeneratePassCode(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	passCode := generateTotpPassCode(otpSecret)
+	passCode := otp.GenerateTotpPassCode(otpSecret)
 	passCodeJson := otpPassCode{PassCode: passCode}
 	err = json.NewEncoder(w).Encode(passCodeJson)
 	if err != nil {
 		log.Println(err.Error())
 	}
-}
-
-func generateTotpPassCode(otpSecret string) string {
-	passCode, err := totp.GenerateCode(otpSecret, time.Now())
-	if err != nil {
-		log.Println(err.Error())
-	}
-
-	return passCode
 }
 
 type otpPassCode struct {
