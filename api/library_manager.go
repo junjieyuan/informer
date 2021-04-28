@@ -6,7 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"junjie.pro/informer/conf"
-	"junjie.pro/informer/library"
+	"junjie.pro/informer/pkg/library"
 	"log"
 	"net/http"
 )

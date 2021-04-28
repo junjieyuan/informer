@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"github.com/gorilla/mux"
 	"junjie.pro/informer/conf"
-	"junjie.pro/informer/library"
+	"junjie.pro/informer/pkg/library"
 	"junjie.pro/informer/pkg/otp"
 	"log"
 	"net/http"

@@ -1,6 +1,6 @@
 package api
 
-import "junjie.pro/informer/library"
+import "junjie.pro/informer/pkg/library"
 
 var (
 	SuccessMessage        = Message{Message: "success"}

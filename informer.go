@@ -5,7 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"junjie.pro/informer/api"
-	"junjie.pro/informer/library"
+	"junjie.pro/informer/pkg/library"
 	"log"
 	"os"
 	"strconv"
