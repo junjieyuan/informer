@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"github.com/gorilla/mux"
 	"io"
 	"io/ioutil"
 	"junjie.pro/informer/conf"
@@ -193,13 +194,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	//Response message is json
 	w.Header().Add("Content-Type", "application/json")
 
-	//Read request body and close it
-	body, err := ioutil.ReadAll(io.Reader(r.Body))
-	if err != nil {
-		w.WriteHeader(500)
-		log.Fatalln(err)
-	}
-	err = r.Body.Close()
+	err := r.Body.Close()
 	if err != nil {
 		w.WriteHeader(500)
 		log.Fatalln(err)
@@ -233,18 +228,8 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	//Parse secure(s)' key from request body
-	var secures PrimaryKeys
-	err = json.Unmarshal(body, &secures)
-	if err != nil {
-		w.WriteHeader(500)
-		err = json.NewEncoder(w).Encode(DataNotCorrectMessage)
-		if err != nil {
-			log.Fatalln(err.Error())
-		}
-
-		return
-	}
+	pathVars := mux.Vars(r)
+	primaryKey := pathVars["uuid"]
 
 	//Read informer library
 	informerLibrary, err := library.ReadLibrary()
@@ -253,9 +238,7 @@ func Remove(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//Find index of secure and remove it
-	for _, secure := range secures.PrimaryKey {
-		informerLibrary.Remove(secure)
-	}
+	informerLibrary.Remove(primaryKey)
 
 	//Write informer library
 	err = informerLibrary.WriteLibrary()

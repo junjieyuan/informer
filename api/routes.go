@@ -44,8 +44,8 @@ var routes = Routes{
 	},
 	Route{
 		Name:        "Remove",
-		Method:      "POST",
-		Pattern:     "/libraries/remove",
+		Method:      "DELETE",
+		Pattern:     "/library/{uuid}",
 		HandlerFunc: Remove,
 	},
 	Route{
