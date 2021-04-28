@@ -26,7 +26,7 @@ var routes = Routes{
 	},
 	Route{
 		Name:        "Change password",
-		Method:      "POST",
+		Method:      "PUT",
 		Pattern:     "/change-password",
 		HandlerFunc: ChangePassword,
 	},
@@ -62,7 +62,7 @@ var routes = Routes{
 	},
 	Route{
 		Name:        "Change master password",
-		Method:      "POST",
+		Method:      "PUT",
 		Pattern:     "/change-master-password",
 		HandlerFunc: ChangeMasterPassword,
 	},
