@@ -33,7 +33,7 @@ var routes = Routes{
 	Route{
 		Name:        "List",
 		Method:      "GET",
-		Pattern:     "/libraries",
+		Pattern:     "/library",
 		HandlerFunc: List,
 	},
 	Route{
