@@ -11,20 +11,9 @@ func Serve() {
 	log.Println("Starting server")
 	router := mux.NewRouter().StrictSlash(true)
 
-	router.HandleFunc("/login", Login)
-	router.HandleFunc("/logout", Logout)
-
-	router.HandleFunc("/libraries", List)
-	router.HandleFunc("/libraries/add", Add)
-	router.HandleFunc("/libraries/remove", Remove)
-	router.HandleFunc("/libraries/update", Update)
-
-	router.HandleFunc("/library/{uuid}/otp", GeneratePassCode)
-
-	router.HandleFunc("/change-password", ChangePassword)
-	router.HandleFunc("/change-master-password", ChangeMasterPassword)
-
-	router.HandleFunc("/generate-password", GeneratePassword)
+	for _, route := range routes {
+		router.Name(route.Name).Methods(route.Method).Path(route.Pattern).HandlerFunc(route.HandlerFunc)
+	}
 
 	//Listen on specific port
 	informer, err := conf.ReadConfig()
